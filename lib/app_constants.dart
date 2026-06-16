@@ -1,4 +1,4 @@
 class AppConstants {
-  static const nomeApp = 'Gestao de Planos de Saude';
+  static const nomeApp = 'Gestão de Planos de Saúde';
   static const casasDecimaisMoeda = 2;
 }
