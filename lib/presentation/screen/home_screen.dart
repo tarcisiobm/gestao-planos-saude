@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_constants.dart';
+import '../../domain/models/usuario.dart';
 import '../../routes.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -8,6 +9,13 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final usuario = ModalRoute.of(context)?.settings.arguments as Usuario?;
+    final nome = (usuario?.nome.isNotEmpty ?? false)
+        ? usuario!.nome
+        : 'Usuário';
+    final email = usuario?.email ?? '';
+    final inicial = nome.isNotEmpty ? nome[0].toUpperCase() : '?';
+
     final itens = <_ItemMenu>[
       _ItemMenu('Clientes', Icons.people, AppRoutes.clientes),
       _ItemMenu('Dependentes', Icons.family_restroom, AppRoutes.dependentes),
@@ -16,8 +24,8 @@ class HomeScreen extends StatelessWidget {
       _ItemMenu('Coberturas', Icons.link, AppRoutes.coberturas),
       _ItemMenu('Contratos', Icons.description, AppRoutes.contratos),
       _ItemMenu('Pagamentos', Icons.payments, AppRoutes.pagamentos),
-      _ItemMenu('Simulacao', Icons.calculate, AppRoutes.simulacao),
-      _ItemMenu('Relatorios', Icons.bar_chart, AppRoutes.relatorios),
+      _ItemMenu('Simulação', Icons.calculate, AppRoutes.simulacao),
+      _ItemMenu('Relatórios', Icons.bar_chart, AppRoutes.relatorios),
     ];
 
     return Scaffold(
@@ -27,27 +35,29 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
-            },
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, AppRoutes.login),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          const Card(
+          Card(
             child: ListTile(
               leading: CircleAvatar(
                 radius: 26,
                 backgroundColor: Colors.teal,
-                child: Icon(Icons.health_and_safety, color: Colors.white),
+                child: Text(
+                  inicial,
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
+                ),
               ),
               title: Text(
-                'Menu principal',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                nome,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text('Protótipo de navegacao dos modulos do sistema'),
+              subtitle: Text(email),
             ),
           ),
           const SizedBox(height: 4),
@@ -73,6 +83,5 @@ class _ItemMenu {
   final String titulo;
   final IconData icone;
   final String rota;
-
   const _ItemMenu(this.titulo, this.icone, this.rota);
 }

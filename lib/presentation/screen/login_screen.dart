@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/services/usuario_service.dart';
 import '../../routes.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,6 +11,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _service = UsuarioService();
   final _email = TextEditingController();
   final _senha = TextEditingController();
 
@@ -20,8 +22,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _entrar() {
-    Navigator.pushReplacementNamed(context, AppRoutes.home);
+  Future<void> _entrar() async {
+    final usuario = await _service.autenticar(_email.text.trim(), _senha.text);
+    if (!mounted) return;
+    if (usuario == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('E-mail ou senha inválidos')),
+      );
+      return;
+    }
+    Navigator.pushReplacementNamed(context, AppRoutes.home, arguments: usuario);
   }
 
   @override
@@ -40,12 +50,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Bem-vindo',
+                'Bem-vindo,',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Acesse o prototipo do sistema de gestao.',
+                'Entre com e-mail e senha para continuar.',
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 48),
@@ -70,9 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(onPressed: _entrar, child: const Text('Entrar')),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.register);
-                },
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.register),
                 child: const Text('Registre-se'),
               ),
             ],

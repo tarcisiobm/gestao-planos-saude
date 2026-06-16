@@ -1,10 +1,24 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app_constants.dart';
+import 'data/app_database.dart';
 import 'routes.dart';
+import 'service_locator.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
+  await AppDatabase.init();
+  ServiceLocator.instance.setup();
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -15,6 +29,8 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: AppConstants.nomeApp,
       debugShowCheckedModeBanner: false,
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.teal,

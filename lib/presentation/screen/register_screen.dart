@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/models/usuario.dart';
+import '../../domain/services/usuario_service.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -8,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _service = UsuarioService();
   final _nome = TextEditingController();
   final _email = TextEditingController();
   final _senha = TextEditingController();
@@ -22,10 +26,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _registrar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Conta registrada no prototipo')),
+  Future<void> _registrar() async {
+    if (_email.text.isEmpty || _senha.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preencha e-mail e senha')));
+      return;
+    }
+    if (_senha.text != _confirmar.text) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('As senhas não coincidem')));
+      return;
+    }
+    await _service.cadastrar(
+      Usuario(nome: _nome.text, email: _email.text.trim(), senha: _senha.text),
     );
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Conta criada! Faça login.')));
     Navigator.pop(context);
   }
 
@@ -44,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ElevatedButton(onPressed: _registrar, child: const Text('Registrar')),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Ja tenho conta, logar'),
+            child: const Text('Já tenho conta, Logar'),
           ),
         ],
       ),
