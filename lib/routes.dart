@@ -10,14 +10,15 @@ import 'presentation/screen/dependente/dependente_form_screen.dart';
 import 'presentation/screen/dependente/dependente_list_screen.dart';
 import 'presentation/screen/home_screen.dart';
 import 'presentation/screen/login_screen.dart';
+import 'presentation/screen/register_screen.dart';
 import 'presentation/screen/pagamento/pagamento_form_screen.dart';
 import 'presentation/screen/pagamento/pagamento_list_screen.dart';
-import 'presentation/screen/placeholder_screen.dart';
 import 'presentation/screen/plano/plano_form_screen.dart';
 import 'presentation/screen/plano/plano_list_screen.dart';
 import 'presentation/screen/prestador/prestador_form_screen.dart';
 import 'presentation/screen/prestador/prestador_list_screen.dart';
-import 'presentation/screen/register_screen.dart';
+import 'presentation/screen/relatorio/relatorio_screen.dart';
+import 'presentation/screen/simulacao/simulacao_screen.dart';
 
 class AppRoutes {
   static const String home = '/';
@@ -58,7 +59,7 @@ class AppRoutes {
     pagamentoForm: (_) => const PagamentoFormScreen(),
     coberturas: (_) => const CoberturaListScreen(),
     coberturaForm: (_) => const CoberturaFormScreen(),
-    relatorios: (_) => const PlaceholderScreen(titulo: 'Relatorios'),
-    simulacao: (_) => const PlaceholderScreen(titulo: 'Simulacao'),
+    relatorios: (_) => const RelatorioScreen(),
+    simulacao: (_) => const SimulacaoScreen(),
   };
 }
