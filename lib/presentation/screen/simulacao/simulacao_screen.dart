@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app_constants.dart';
 import '../../../domain/models/plano.dart';
+import '../../../domain/services/faixa_valor_service.dart';
 import '../../../domain/services/plano_service.dart';
 
 class SimulacaoScreen extends StatefulWidget {
@@ -13,11 +14,15 @@ class SimulacaoScreen extends StatefulWidget {
 
 class _SimulacaoScreenState extends State<SimulacaoScreen> {
   final _planoService = PlanoService();
+  final _faixaValorService = FaixaValorService();
+  final _idadeController = TextEditingController();
   final _dependentesController = TextEditingController(text: '0');
   List<Plano> _planos = [];
   int? _planoId;
   double? _resultado;
+  double _valorPlanoUsado = 0;
   double _valorDependenteUsado = 0;
+  int? _idadeUsada;
   bool _carregando = true;
 
   @override
@@ -36,23 +41,41 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
 
   @override
   void dispose() {
+    _idadeController.dispose();
     _dependentesController.dispose();
     super.dispose();
   }
 
-  void _simular() {
+  Future<void> _simular() async {
     if (_planoId == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Selecione um plano')));
       return;
     }
+    final idade = int.tryParse(_idadeController.text);
+    if (idade == null || idade < 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Informe uma idade válida')));
+      return;
+    }
     final plano = _planos.firstWhere((plano) => plano.id == _planoId);
+    final valorFaixa = await _faixaValorService.valorPorIdade(plano.id!, idade);
+    if (!mounted) return;
+    if (valorFaixa == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhuma faixa cobre essa idade')),
+      );
+      return;
+    }
     final quantidadeDependentes =
         int.tryParse(_dependentesController.text) ?? 0;
     setState(() {
+      _idadeUsada = idade;
+      _valorPlanoUsado = valorFaixa;
       _valorDependenteUsado = plano.valorDependente;
-      _resultado = plano.valor + quantidadeDependentes * plano.valorDependente;
+      _resultado = valorFaixa + quantidadeDependentes * plano.valorDependente;
     });
   }
 
@@ -86,6 +109,15 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
           ),
           const SizedBox(height: 12),
           TextField(
+            controller: _idadeController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Idade do titular',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
             controller: _dependentesController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
@@ -102,7 +134,7 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Text(
-              '(plano + R\$ ${_valorDependenteUsado.toStringAsFixed(AppConstants.casasDecimaisMoeda)} por dependente)',
+              '(faixa de $_idadeUsada anos: R\$ ${_valorPlanoUsado.toStringAsFixed(AppConstants.casasDecimaisMoeda)} + R\$ ${_valorDependenteUsado.toStringAsFixed(AppConstants.casasDecimaisMoeda)} por dependente)',
               style: const TextStyle(color: Colors.grey),
             ),
           ],

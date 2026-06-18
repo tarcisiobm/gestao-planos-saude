@@ -80,10 +80,11 @@ class AppDatabase {
         FOREIGN KEY (cliente_id) REFERENCES cliente(id))
     ''');
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS cobertura(
+      CREATE TABLE IF NOT EXISTS servico(
         id INT AUTO_INCREMENT PRIMARY KEY,
         plano_id INT NOT NULL,
         prestador_id INT NOT NULL,
+        nome VARCHAR(80) NOT NULL,
         FOREIGN KEY (plano_id) REFERENCES plano(id),
         FOREIGN KEY (prestador_id) REFERENCES prestador(id))
     ''');
@@ -93,6 +94,26 @@ class AppDatabase {
         nome VARCHAR(120),
         email VARCHAR(120) NOT NULL,
         senha VARCHAR(120) NOT NULL)
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS faixa_valor(
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        plano_id INT NOT NULL,
+        idade_min INT NOT NULL,
+        idade_max INT NOT NULL,
+        valor DECIMAL(10,2) NOT NULL,
+        FOREIGN KEY (plano_id) REFERENCES plano(id))
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS atendimento(
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        cliente_id INT NOT NULL,
+        servico_id INT NOT NULL,
+        data VARCHAR(20),
+        horario VARCHAR(10),
+        descricao VARCHAR(255),
+        FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+        FOREIGN KEY (servico_id) REFERENCES servico(id))
     ''');
   }
 }

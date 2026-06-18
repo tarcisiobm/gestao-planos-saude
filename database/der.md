@@ -5,8 +5,10 @@ GitHub). Para a entrega, exportar como PNG/PDF. Espelha `schema.sql`.
 
 Relações:
 - um **cliente** tem vários **dependentes**, **contratos** e **pagamentos**;
-- um **plano** aparece em vários **contratos** e em várias **coberturas**;
-- um **prestador** aparece em várias **coberturas** (vínculo plano × prestador);
+- um **cliente** também possui vários **atendimentos** no histórico;
+- um **plano** aparece em vários **contratos**, **serviços** e **faixas de valor**;
+- um **prestador** aparece em vários **serviços** (vínculo plano × prestador);
+- um **serviço** aparece em vários **atendimentos**;
 - **usuario**: tabela de login, sem relações com o domínio.
 
 ```mermaid
@@ -14,9 +16,12 @@ erDiagram
     CLIENTE ||--o{ DEPENDENTE : "tem"
     CLIENTE ||--o{ CONTRATO : "assina"
     CLIENTE ||--o{ PAGAMENTO : "deve"
+    CLIENTE ||--o{ ATENDIMENTO : "realiza"
     PLANO ||--o{ CONTRATO : "contratado em"
-    PLANO ||--o{ COBERTURA : "coberto por"
-    PRESTADOR ||--o{ COBERTURA : "atende em"
+    PLANO ||--o{ SERVICO : "oferece"
+    PLANO ||--o{ FAIXA_VALOR : "tem"
+    PRESTADOR ||--o{ SERVICO : "presta"
+    SERVICO ||--o{ ATENDIMENTO : "usado em"
 
     CLIENTE {
         int id PK
@@ -65,10 +70,26 @@ erDiagram
         varchar vencimento
         varchar status
     }
-    COBERTURA {
+    SERVICO {
         int id PK
         int plano_id FK
         int prestador_id FK
+        varchar nome
+    }
+    FAIXA_VALOR {
+        int id PK
+        int plano_id FK
+        int idade_min
+        int idade_max
+        decimal valor
+    }
+    ATENDIMENTO {
+        int id PK
+        int cliente_id FK
+        int servico_id FK
+        varchar data
+        varchar horario
+        varchar descricao
     }
     USUARIO {
         int id PK

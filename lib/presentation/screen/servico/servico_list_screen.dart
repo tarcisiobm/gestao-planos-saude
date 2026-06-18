@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../../domain/models/cobertura.dart';
-import '../../../domain/services/cobertura_service.dart';
+import '../../../domain/models/servico.dart';
+import '../../../domain/services/servico_service.dart';
 import '../../constants/opcoes_menu_lista.dart';
 import '../../../routes.dart';
 
-class CoberturaListScreen extends StatefulWidget {
-  const CoberturaListScreen({super.key});
+class ServicoListScreen extends StatefulWidget {
+  const ServicoListScreen({super.key});
 
   @override
-  State<CoberturaListScreen> createState() => _CoberturaListScreenState();
+  State<ServicoListScreen> createState() => _ServicoListScreenState();
 }
 
-class _CoberturaListScreenState extends State<CoberturaListScreen> {
-  final _service = CoberturaService();
-  List<Cobertura> _coberturas = [];
+class _ServicoListScreenState extends State<ServicoListScreen> {
+  final _service = ServicoService();
+  List<Servico> _servicos = [];
 
   @override
   void initState() {
@@ -23,29 +23,27 @@ class _CoberturaListScreenState extends State<CoberturaListScreen> {
   }
 
   Future<void> _carregar([String busca = '']) async {
-    final coberturas = busca.isEmpty
+    final servicos = busca.isEmpty
         ? await _service.findAll()
         : await _service.buscar(busca);
-    setState(() => _coberturas = coberturas);
+    setState(() => _servicos = servicos);
   }
 
-  Future<void> _abrirForm([Cobertura? cobertura]) async {
+  Future<void> _abrirForm([Servico? servico]) async {
     await Navigator.pushNamed(
       context,
-      AppRoutes.coberturaForm,
-      arguments: cobertura,
+      AppRoutes.servicoForm,
+      arguments: servico,
     );
     _carregar();
   }
 
-  Future<void> _confirmarExclusao(Cobertura cobertura) async {
+  Future<void> _confirmarExclusao(Servico servico) async {
     final confirmouExclusao = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Excluir?'),
-        content: Text(
-          'Excluir a cobertura ${cobertura.planoNome} / ${cobertura.prestadorNome}?',
-        ),
+        content: Text('Excluir o serviço ${servico.nome}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -59,7 +57,7 @@ class _CoberturaListScreenState extends State<CoberturaListScreen> {
       ),
     );
     if (confirmouExclusao == true) {
-      await _service.excluir(cobertura.id!);
+      await _service.excluir(servico.id!);
       _carregar();
     }
   }
@@ -67,14 +65,14 @@ class _CoberturaListScreenState extends State<CoberturaListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Coberturas')),
+      appBar: AppBar(title: const Text('Serviços')),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8),
             child: TextField(
               decoration: const InputDecoration(
-                labelText: 'Buscar por plano',
+                labelText: 'Buscar por nome',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
               ),
@@ -83,20 +81,22 @@ class _CoberturaListScreenState extends State<CoberturaListScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _coberturas.length,
+              itemCount: _servicos.length,
               itemBuilder: (context, indice) {
-                final cobertura = _coberturas[indice];
+                final servico = _servicos[indice];
                 return ListTile(
-                  title: Text(cobertura.planoNome),
-                  subtitle: Text('Prestador: ${cobertura.prestadorNome}'),
-                  onTap: () => _abrirForm(cobertura),
+                  title: Text(servico.nome),
+                  subtitle: Text(
+                    '${servico.planoNome} · ${servico.prestadorNome}',
+                  ),
+                  onTap: () => _abrirForm(servico),
                   trailing: PopupMenuButton<OpcaoMenuLista>(
                     onSelected: (opcao) {
                       if (opcao == OpcaoMenuLista.editar) {
-                        _abrirForm(cobertura);
+                        _abrirForm(servico);
                       }
                       if (opcao == OpcaoMenuLista.excluir) {
-                        _confirmarExclusao(cobertura);
+                        _confirmarExclusao(servico);
                       }
                     },
                     itemBuilder: (_) => itensMenuLista,

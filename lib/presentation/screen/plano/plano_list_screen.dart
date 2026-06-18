@@ -35,6 +35,15 @@ class _PlanoListScreenState extends State<PlanoListScreen> {
     _carregar();
   }
 
+  Future<void> _abrirDetalhe(Plano plano) async {
+    await Navigator.pushNamed(
+      context,
+      AppRoutes.planoDetalhe,
+      arguments: plano,
+    );
+    _carregar();
+  }
+
   Future<void> _confirmarExclusao(Plano plano) async {
     final confirmouExclusao = await showDialog<bool>(
       context: context,
@@ -88,7 +97,7 @@ class _PlanoListScreenState extends State<PlanoListScreen> {
                     'Mensalidade: R\$ ${plano.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda)}\n'
                     'Dependente: R\$ ${plano.valorDependente.toStringAsFixed(AppConstants.casasDecimaisMoeda)} - ${plano.tipoCobertura}',
                   ),
-                  onTap: () => _abrirForm(plano),
+                  onTap: () => _abrirDetalhe(plano),
                   trailing: PopupMenuButton<OpcaoMenuLista>(
                     onSelected: (opcao) {
                       if (opcao == OpcaoMenuLista.editar) {

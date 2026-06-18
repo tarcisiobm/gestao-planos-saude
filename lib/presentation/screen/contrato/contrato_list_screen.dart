@@ -62,8 +62,17 @@ class _ContratoListScreenState extends State<ContratoListScreen> {
     }
   }
 
+  Map<String, List<Contrato>> _agruparPorCliente() {
+    final grupos = <String, List<Contrato>>{};
+    for (final contrato in _contratos) {
+      grupos.putIfAbsent(contrato.clienteNome, () => []).add(contrato);
+    }
+    return grupos;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final contratosPorCliente = _agruparPorCliente();
     return Scaffold(
       appBar: AppBar(title: const Text('Contratos')),
       body: Column(
@@ -80,30 +89,43 @@ class _ContratoListScreenState extends State<ContratoListScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _contratos.length,
-              itemBuilder: (context, indice) {
-                final contrato = _contratos[indice];
-                return ListTile(
-                  title: Text(contrato.clienteNome),
-                  subtitle: Text(
-                    'Plano ${contrato.planoNome} — ${contrato.status}',
+            child: _contratos.isEmpty
+                ? const Center(child: Text('Nenhum contrato cadastrado'))
+                : ListView(
+                    children: [
+                      for (final grupo in contratosPorCliente.entries) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                          child: Text(
+                            grupo.key,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        for (final contrato in grupo.value)
+                          ListTile(
+                            title: Text(contrato.planoNome),
+                            subtitle: Text(
+                              '${contrato.status} - início ${contrato.dataInicio}',
+                            ),
+                            onTap: () => _abrirForm(contrato),
+                            trailing: PopupMenuButton<OpcaoMenuLista>(
+                              onSelected: (opcao) {
+                                if (opcao == OpcaoMenuLista.editar) {
+                                  _abrirForm(contrato);
+                                }
+                                if (opcao == OpcaoMenuLista.excluir) {
+                                  _confirmarExclusao(contrato);
+                                }
+                              },
+                              itemBuilder: (_) => itensMenuLista,
+                            ),
+                          ),
+                      ],
+                    ],
                   ),
-                  onTap: () => _abrirForm(contrato),
-                  trailing: PopupMenuButton<OpcaoMenuLista>(
-                    onSelected: (opcao) {
-                      if (opcao == OpcaoMenuLista.editar) {
-                        _abrirForm(contrato);
-                      }
-                      if (opcao == OpcaoMenuLista.excluir) {
-                        _confirmarExclusao(contrato);
-                      }
-                    },
-                    itemBuilder: (_) => itensMenuLista,
-                  ),
-                );
-              },
-            ),
           ),
         ],
       ),

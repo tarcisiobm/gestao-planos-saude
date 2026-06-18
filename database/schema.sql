@@ -1,6 +1,7 @@
 -- Sistema de Gestão de Planos de Saúde
 -- Script DDL (MySQL / MariaDB) — estrutura do banco.
--- Tabelas: cliente, dependente, plano, prestador, contrato, pagamento, cobertura, usuario.
+-- Tabelas: cliente, dependente, plano, prestador, contrato, pagamento, servico,
+-- faixa_valor, atendimento, usuario.
 
 CREATE DATABASE IF NOT EXISTS gestao_planos
   DEFAULT CHARACTER SET utf8mb4
@@ -65,12 +66,33 @@ CREATE TABLE IF NOT EXISTS pagamento (
   FOREIGN KEY (cliente_id) REFERENCES cliente(id)
 );
 
-CREATE TABLE IF NOT EXISTS cobertura (
+CREATE TABLE IF NOT EXISTS servico (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   plano_id     INT NOT NULL,
   prestador_id INT NOT NULL,
+  nome         VARCHAR(80) NOT NULL,
   FOREIGN KEY (plano_id) REFERENCES plano(id),
   FOREIGN KEY (prestador_id) REFERENCES prestador(id)
+);
+
+CREATE TABLE IF NOT EXISTS faixa_valor (
+  id        INT AUTO_INCREMENT PRIMARY KEY,
+  plano_id  INT NOT NULL,
+  idade_min INT NOT NULL,
+  idade_max INT NOT NULL,
+  valor     DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (plano_id) REFERENCES plano(id)
+);
+
+CREATE TABLE IF NOT EXISTS atendimento (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id  INT NOT NULL,
+  servico_id  INT NOT NULL,
+  data        VARCHAR(20),
+  horario     VARCHAR(10),
+  descricao   VARCHAR(255),
+  FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+  FOREIGN KEY (servico_id) REFERENCES servico(id)
 );
 
 -- Tabela de login (autenticação simples, sem relações com o domínio).

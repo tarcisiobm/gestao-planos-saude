@@ -1,8 +1,9 @@
 # Gestão de Planos de Saúde (app Flutter)
 
 Aplicativo de gestão para uma operadora de planos de saúde: login, cadastros
-(clientes, dependentes, planos, prestadores, coberturas, contratos e pagamentos),
-simulação de proposta e relatórios. Os dados ficam em um banco **MySQL/MariaDB**.
+(clientes, dependentes, planos, prestadores, serviços, contratos e pagamentos),
+simulação de proposta e histórico de atendimentos. Os dados ficam em um banco
+**MySQL/MariaDB**.
 
 ## Tecnologias
 
@@ -26,17 +27,18 @@ simulação de proposta e relatórios. Os dados ficam em um banco **MySQL/MariaD
 - **Clientes** — cadastro de clientes (nome, CPF, telefone, e-mail, endereço).
 - **Dependentes** — dependentes vinculados a um cliente titular.
 - **Planos** — planos de saúde (tipo de cobertura, mensalidade, valor por
-  dependente, vigência e forma de pagamento).
+  dependente, vigência e forma de pagamento); ao tocar num plano, aparecem os
+  serviços e as faixas de valor por idade.
 - **Prestadores** — hospitais, clínicas e laboratórios (tipo, especialidade, local).
-- **Coberturas** — vínculo plano × prestador (quais prestadores atendem cada plano).
+- **Serviços** — vínculo plano × prestador com o nome do serviço oferecido.
 - **Contratos** — venda de um plano a um cliente (datas, status, renovação automática).
 - **Pagamentos** — mensalidades com status (pago, pendente, atrasado).
-- **Simulação** — calcula um valor estimado (plano + nº de dependentes usando o
-  valor por dependente definido no plano); não salva nada.
-- **Relatórios** — totais, contratos ativos, inadimplência e receita recebida.
+- **Simulação** — calcula um valor estimado pela idade do titular, usando a faixa
+  de valor configurada no plano + nº de dependentes.
+- **Histórico** — cadastro de atendimentos e consulta do histórico por cliente.
 
-Toda lista tem **busca por nome**, **exclusão com confirmação**, botão **+** para
-adicionar e já vem com **10 registros de exemplo** (criados na primeira execução).
+As listas principais têm **busca**, **exclusão com confirmação**, botão **+** para
+adicionar e o app já vem com **10 registros de exemplo** (criados na primeira execução).
 
 ## Como desenvolver localmente
 
@@ -118,4 +120,4 @@ O desenvolvimento foi organizado por branches de iteração/feature:
 - `iteracao03-autenticacao`
 - `iteracao04-cadastros-base`
 - `iteracao05-operacoes-plano`
-- `iteracao06-relatorios-entrega`
+- `iteracao06-historico-entrega`

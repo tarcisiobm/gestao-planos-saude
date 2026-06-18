@@ -1,11 +1,12 @@
+import 'data/atendimento_repository_mysql.dart';
 import 'data/cliente_repository_mysql.dart';
-import 'data/cobertura_repository_mysql.dart';
 import 'data/contrato_repository_mysql.dart';
 import 'data/dependente_repository_mysql.dart';
+import 'data/faixa_valor_repository_mysql.dart';
 import 'data/pagamento_repository_mysql.dart';
 import 'data/plano_repository_mysql.dart';
 import 'data/prestador_repository_mysql.dart';
-import 'data/relatorio_repository_mysql.dart';
+import 'data/servico_repository_mysql.dart';
 import 'data/usuario_repository_mysql.dart';
 
 class ServiceLocator {
@@ -18,8 +19,9 @@ class ServiceLocator {
   static const String dependenteRepository = 'dependente';
   static const String contratoRepository = 'contrato';
   static const String pagamentoRepository = 'pagamento';
-  static const String coberturaRepository = 'cobertura';
-  static const String relatorioRepository = 'relatorio';
+  static const String servicoRepository = 'servico';
+  static const String faixaValorRepository = 'faixa_valor';
+  static const String atendimentoRepository = 'atendimento';
   static const String usuarioRepository = 'usuario';
 
   final Map<String, dynamic> _repositorios = {};
@@ -31,8 +33,9 @@ class ServiceLocator {
     _repositorios[dependenteRepository] = DependenteRepositoryMysql();
     _repositorios[contratoRepository] = ContratoRepositoryMysql();
     _repositorios[pagamentoRepository] = PagamentoRepositoryMysql();
-    _repositorios[coberturaRepository] = CoberturaRepositoryMysql();
-    _repositorios[relatorioRepository] = RelatorioRepositoryMysql();
+    _repositorios[servicoRepository] = ServicoRepositoryMysql();
+    _repositorios[faixaValorRepository] = FaixaValorRepositoryMysql();
+    _repositorios[atendimentoRepository] = AtendimentoRepositoryMysql();
     _repositorios[usuarioRepository] = UsuarioRepositoryMysql();
   }
 

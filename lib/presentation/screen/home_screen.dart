@@ -21,11 +21,11 @@ class HomeScreen extends StatelessWidget {
       _ItemMenu('Dependentes', Icons.family_restroom, AppRoutes.dependentes),
       _ItemMenu('Planos', Icons.assignment, AppRoutes.planos),
       _ItemMenu('Prestadores', Icons.local_hospital, AppRoutes.prestadores),
-      _ItemMenu('Coberturas', Icons.link, AppRoutes.coberturas),
+      _ItemMenu('Serviços', Icons.medical_services, AppRoutes.servicos),
       _ItemMenu('Contratos', Icons.description, AppRoutes.contratos),
       _ItemMenu('Pagamentos', Icons.payments, AppRoutes.pagamentos),
       _ItemMenu('Simulação', Icons.calculate, AppRoutes.simulacao),
-      _ItemMenu('Relatórios', Icons.bar_chart, AppRoutes.relatorios),
+      _ItemMenu('Histórico', Icons.history, AppRoutes.historico),
     ];
 
     return Scaffold(

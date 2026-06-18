@@ -22,10 +22,10 @@ Tracker do trabalho. Marcar `[x]` ao concluir. Princípio: menos = mais, código
 - [x] **Contrato** — RF03 / RN01. Liga Cliente + Plano; data, validade, status,
       switch de renovação automática.
 - [x] **Pagamento** — RF05 / RN05. CRUD com status pago/pendente/atrasado.
-- [x] **Cobertura** — RF07 / RN04. Liga Plano × Prestador (dois dropdowns).
-- [x] **Simulação** — RF04 / RN02. Tela que calcula valor estimado (plano + dependentes).
-- [x] **Relatórios** — RF08 / RF09. Tela só-leitura: contagens, contratos ativos,
-      inadimplência, receita recebida.
+- [x] **Serviço** — RF07 / RN04. Liga Plano × Prestador e nome do serviço oferecido.
+- [x] **Faixas de valor** — valores configuráveis por idade dentro de cada plano.
+- [x] **Simulação** — RF04 / RN02. Tela que calcula valor estimado por idade + dependentes.
+- [x] **Histórico** — RF08 / RF09. Cadastro de atendimentos e histórico por cliente.
 - [x] **Login/Registro** — tela de login + cadastro de usuário (igual ao exemplo do
       prof); o app abre no login. Usuário padrão: `admin@email.com` / `123`.
 
@@ -43,7 +43,7 @@ Cada CRUD tem busca, popup de exclusão, FAB e dados em banco. Cada lista tem �
 
 ## Entregáveis finais (enunciado)
 
-- [x] DDL `.sql` (MySQL/MariaDB) — `database/schema.sql` (7 tabelas)
+- [x] DDL `.sql` (MySQL/MariaDB) — `database/schema.sql`
 - [x] App completo (todos os RF/RN) — `flutter analyze` limpo
 - [ ] DER imagem/PDF (fonte Mermaid pronta em `database/der.md`; falta exportar)
 - [ ] Documentação (base em `docs/`)
