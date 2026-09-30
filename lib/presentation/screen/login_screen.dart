@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../data/api_client.dart';
+import '../../domain/models/usuario.dart';
 import '../../domain/services/usuario_service.dart';
 import '../../routes.dart';
 
@@ -23,8 +25,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _entrar() async {
-    final usuario = await _service.autenticar(_email.text.trim(), _senha.text);
-    if (!mounted) return;
+    Usuario? usuario;
+    try {
+      usuario = await _service.autenticar(_email.text.trim(), _senha.text);
+    } on ApiException catch (erro) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(erro.message)));
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     if (usuario == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('E-mail ou senha inválidos')),

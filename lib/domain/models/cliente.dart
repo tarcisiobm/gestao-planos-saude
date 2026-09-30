@@ -4,7 +4,13 @@ class Cliente {
   String cpf;
   String telefone;
   String email;
-  String endereco;
+  String rua;
+  String numero;
+  String complemento;
+  String bairro;
+  String cidade;
+  String estado;
+  String cep;
 
   Cliente({
     this.id,
@@ -12,7 +18,13 @@ class Cliente {
     this.cpf = '',
     this.telefone = '',
     this.email = '',
-    this.endereco = '',
+    this.rua = '',
+    this.numero = '',
+    this.complemento = '',
+    this.bairro = '',
+    this.cidade = '',
+    this.estado = '',
+    this.cep = '',
   });
 
   Map<String, dynamic> toMap() => {
@@ -21,7 +33,13 @@ class Cliente {
     'cpf': cpf,
     'telefone': telefone,
     'email': email,
-    'endereco': endereco,
+    'rua': rua,
+    'numero': numero,
+    'complemento': complemento,
+    'bairro': bairro,
+    'cidade': cidade,
+    'estado': estado,
+    'cep': cep,
   };
 
   static Cliente fromMap(Map<String, dynamic> map) => Cliente(
@@ -30,6 +48,12 @@ class Cliente {
     cpf: map['cpf'] ?? '',
     telefone: map['telefone'] ?? '',
     email: map['email'] ?? '',
-    endereco: map['endereco'] ?? '',
+    rua: map['rua'] ?? '',
+    numero: map['numero'] ?? '',
+    complemento: map['complemento'] ?? '',
+    bairro: map['bairro'] ?? '',
+    cidade: map['cidade'] ?? '',
+    estado: map['estado'] ?? '',
+    cep: map['cep'] ?? '',
   );
 }

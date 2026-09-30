@@ -35,6 +35,9 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+**/bin/
+**/obj/
+**/appsettings.Development.json
 
 # Symbolication related
 app.*.symbols

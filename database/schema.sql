@@ -15,7 +15,13 @@ CREATE TABLE IF NOT EXISTS cliente (
   cpf      VARCHAR(14)  NOT NULL,
   telefone VARCHAR(20),
   email    VARCHAR(120),
-  endereco VARCHAR(200)
+  rua         VARCHAR(120),
+  numero      VARCHAR(20),
+  complemento VARCHAR(80),
+  bairro      VARCHAR(80),
+  cidade      VARCHAR(80),
+  estado      VARCHAR(2),
+  cep         VARCHAR(9)
 );
 
 CREATE TABLE IF NOT EXISTS dependente (
@@ -100,5 +106,6 @@ CREATE TABLE IF NOT EXISTS usuario (
   id    INT AUTO_INCREMENT PRIMARY KEY,
   nome  VARCHAR(120),
   email VARCHAR(120) NOT NULL,
-  senha VARCHAR(120) NOT NULL
+  senha VARCHAR(120) NULL COMMENT 'Somente para migração da versão legada',
+  senha_hash VARCHAR(255) NOT NULL
 );

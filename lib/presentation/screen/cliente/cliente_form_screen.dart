@@ -17,7 +17,13 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
   late final TextEditingController _cpf;
   late final TextEditingController _telefone;
   late final TextEditingController _email;
-  late final TextEditingController _endereco;
+  late final TextEditingController _rua;
+  late final TextEditingController _numero;
+  late final TextEditingController _complemento;
+  late final TextEditingController _bairro;
+  late final TextEditingController _cidade;
+  late final TextEditingController _estado;
+  late final TextEditingController _cep;
   bool _iniciado = false;
 
   @override
@@ -31,7 +37,13 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
     _cpf = TextEditingController(text: _cliente.cpf);
     _telefone = TextEditingController(text: _cliente.telefone);
     _email = TextEditingController(text: _cliente.email);
-    _endereco = TextEditingController(text: _cliente.endereco);
+    _rua = TextEditingController(text: _cliente.rua);
+    _numero = TextEditingController(text: _cliente.numero);
+    _complemento = TextEditingController(text: _cliente.complemento);
+    _bairro = TextEditingController(text: _cliente.bairro);
+    _cidade = TextEditingController(text: _cliente.cidade);
+    _estado = TextEditingController(text: _cliente.estado);
+    _cep = TextEditingController(text: _cliente.cep);
   }
 
   @override
@@ -41,7 +53,13 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
       _cpf.dispose();
       _telefone.dispose();
       _email.dispose();
-      _endereco.dispose();
+      _rua.dispose();
+      _numero.dispose();
+      _complemento.dispose();
+      _bairro.dispose();
+      _cidade.dispose();
+      _estado.dispose();
+      _cep.dispose();
     }
     super.dispose();
   }
@@ -51,7 +69,13 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
     _cliente.cpf = _cpf.text;
     _cliente.telefone = _telefone.text;
     _cliente.email = _email.text;
-    _cliente.endereco = _endereco.text;
+    _cliente.rua = _rua.text;
+    _cliente.numero = _numero.text;
+    _cliente.complemento = _complemento.text;
+    _cliente.bairro = _bairro.text;
+    _cliente.cidade = _cidade.text;
+    _cliente.estado = _estado.text;
+    _cliente.cep = _cep.text;
     await _service.salvar(_cliente);
     if (mounted) Navigator.pop(context);
   }
@@ -68,7 +92,13 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
           _campo(_cpf, 'CPF'),
           _campo(_telefone, 'Telefone'),
           _campo(_email, 'E-mail'),
-          _campo(_endereco, 'Endereço'),
+          _campo(_rua, 'Rua'),
+          _campo(_numero, 'Número'),
+          _campo(_complemento, 'Complemento'),
+          _campo(_bairro, 'Bairro'),
+          _campo(_cidade, 'Cidade'),
+          _campo(_estado, 'Estado'),
+          _campo(_cep, 'CEP'),
           const SizedBox(height: 16),
           ElevatedButton(onPressed: _salvar, child: const Text('Salvar')),
         ],

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../app_constants.dart';
+import '../../../data/api_client.dart';
 import '../../../domain/models/plano.dart';
-import '../../../domain/services/faixa_valor_service.dart';
 import '../../../domain/services/plano_service.dart';
+import '../../../domain/services/simulacao_service.dart';
 
 class SimulacaoScreen extends StatefulWidget {
   const SimulacaoScreen({super.key});
@@ -14,7 +15,7 @@ class SimulacaoScreen extends StatefulWidget {
 
 class _SimulacaoScreenState extends State<SimulacaoScreen> {
   final _planoService = PlanoService();
-  final _faixaValorService = FaixaValorService();
+  final _simulacaoService = SimulacaoService();
   final _idadeController = TextEditingController();
   final _dependentesController = TextEditingController(text: '0');
   List<Plano> _planos = [];
@@ -60,22 +61,35 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
       ).showSnackBar(const SnackBar(content: Text('Informe uma idade válida')));
       return;
     }
-    final plano = _planos.firstWhere((plano) => plano.id == _planoId);
-    final valorFaixa = await _faixaValorService.valorPorIdade(plano.id!, idade);
-    if (!mounted) return;
-    if (valorFaixa == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nenhuma faixa cobre essa idade')),
-      );
-      return;
-    }
     final quantidadeDependentes =
         int.tryParse(_dependentesController.text) ?? 0;
+    late final ResultadoSimulacao resultado;
+    try {
+      resultado = await _simulacaoService.simular(
+        planoId: _planoId!,
+        idade: idade,
+        quantidadeDependentes: quantidadeDependentes,
+      );
+    } on ApiException catch (erro) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(erro.message)));
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
       _idadeUsada = idade;
-      _valorPlanoUsado = valorFaixa;
-      _valorDependenteUsado = plano.valorDependente;
-      _resultado = valorFaixa + quantidadeDependentes * plano.valorDependente;
+      _valorPlanoUsado = resultado.valorFaixa;
+      _valorDependenteUsado = resultado.valorDependente;
+      _resultado = resultado.valorTotal;
     });
   }
 

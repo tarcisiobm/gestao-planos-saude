@@ -1,13 +1,4 @@
-import 'data/atendimento_repository_mysql.dart';
-import 'data/cliente_repository_mysql.dart';
-import 'data/contrato_repository_mysql.dart';
-import 'data/dependente_repository_mysql.dart';
-import 'data/faixa_valor_repository_mysql.dart';
-import 'data/pagamento_repository_mysql.dart';
-import 'data/plano_repository_mysql.dart';
-import 'data/prestador_repository_mysql.dart';
-import 'data/servico_repository_mysql.dart';
-import 'data/usuario_repository_mysql.dart';
+import 'data/api_repositories.dart';
 
 class ServiceLocator {
   ServiceLocator._interno();
@@ -27,16 +18,16 @@ class ServiceLocator {
   final Map<String, dynamic> _repositorios = {};
 
   void setup() {
-    _repositorios[clienteRepository] = ClienteRepositoryMysql();
-    _repositorios[planoRepository] = PlanoRepositoryMysql();
-    _repositorios[prestadorRepository] = PrestadorRepositoryMysql();
-    _repositorios[dependenteRepository] = DependenteRepositoryMysql();
-    _repositorios[contratoRepository] = ContratoRepositoryMysql();
-    _repositorios[pagamentoRepository] = PagamentoRepositoryMysql();
-    _repositorios[servicoRepository] = ServicoRepositoryMysql();
-    _repositorios[faixaValorRepository] = FaixaValorRepositoryMysql();
-    _repositorios[atendimentoRepository] = AtendimentoRepositoryMysql();
-    _repositorios[usuarioRepository] = UsuarioRepositoryMysql();
+    _repositorios[clienteRepository] = ClienteRepositoryApi();
+    _repositorios[planoRepository] = PlanoRepositoryApi();
+    _repositorios[prestadorRepository] = PrestadorRepositoryApi();
+    _repositorios[dependenteRepository] = DependenteRepositoryApi();
+    _repositorios[contratoRepository] = ContratoRepositoryApi();
+    _repositorios[pagamentoRepository] = PagamentoRepositoryApi();
+    _repositorios[servicoRepository] = ServicoRepositoryApi();
+    _repositorios[faixaValorRepository] = FaixaValorRepositoryApi();
+    _repositorios[atendimentoRepository] = AtendimentoRepositoryApi();
+    _repositorios[usuarioRepository] = UsuarioRepositoryApi();
   }
 
   dynamic findRepository(String nomeRepositorio) {

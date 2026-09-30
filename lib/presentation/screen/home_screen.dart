@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_constants.dart';
+import '../../data/api_client.dart';
 import '../../domain/models/usuario.dart';
 import '../../routes.dart';
 
@@ -35,8 +36,12 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, AppRoutes.login),
+            onPressed: () async {
+              await ApiClient.instance.removerToken();
+              if (context.mounted) {
+                Navigator.pushReplacementNamed(context, AppRoutes.login);
+              }
+            },
           ),
         ],
       ),

@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app_constants.dart';
-import 'data/app_database.dart';
+import 'data/api_client.dart';
 import 'routes.dart';
 import 'service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
-  await AppDatabase.init();
+  await ApiClient.instance.carregarToken();
   ServiceLocator.instance.setup();
   runApp(
     DevicePreview(

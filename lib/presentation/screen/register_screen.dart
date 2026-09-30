@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/api_client.dart';
 import '../../domain/models/usuario.dart';
 import '../../domain/services/usuario_service.dart';
 
@@ -27,10 +28,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _registrar() async {
-    if (_email.text.isEmpty || _senha.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Preencha e-mail e senha')));
+    if (_email.text.isEmpty || _senha.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Informe o e-mail e uma senha com pelo menos 6 caracteres',
+          ),
+        ),
+      );
       return;
     }
     if (_senha.text != _confirmar.text) {
@@ -39,10 +44,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ).showSnackBar(const SnackBar(content: Text('As senhas não coincidem')));
       return;
     }
-    await _service.cadastrar(
-      Usuario(nome: _nome.text, email: _email.text.trim(), senha: _senha.text),
-    );
-    if (!mounted) return;
+    try {
+      await _service.cadastrar(
+        Usuario(
+          nome: _nome.text,
+          email: _email.text.trim(),
+          senha: _senha.text,
+        ),
+      );
+    } on ApiException catch (erro) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(erro.message)));
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Conta criada! Faça login.')));

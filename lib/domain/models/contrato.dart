@@ -30,7 +30,7 @@ class Contrato {
     'data_inicio': dataInicio,
     'validade': validade,
     'status': status,
-    'renovacao_automatica': renovacaoAutomatica ? 1 : 0,
+    'renovacao_automatica': renovacaoAutomatica,
   };
 
   static Contrato fromMap(Map<String, dynamic> map) {

@@ -29,7 +29,13 @@ erDiagram
         varchar cpf
         varchar telefone
         varchar email
-        varchar endereco
+        varchar rua
+        varchar numero
+        varchar complemento
+        varchar bairro
+        varchar cidade
+        varchar estado
+        varchar cep
     }
     DEPENDENTE {
         int id PK
@@ -95,6 +101,7 @@ erDiagram
         int id PK
         varchar nome
         varchar email
-        varchar senha
+        varchar senha_legada
+        varchar senha_hash
     }
 ```
