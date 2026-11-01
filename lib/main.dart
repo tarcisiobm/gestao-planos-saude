@@ -8,17 +8,31 @@ import 'data/api_client.dart';
 import 'routes.dart';
 import 'service_locator.dart';
 
+final mensagensGlobais = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
   await ApiClient.instance.carregarToken();
   ServiceLocator.instance.setup();
+  PlatformDispatcher.instance.onError = exibirErroDaApi;
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
       builder: (context) => const MainApp(),
     ),
   );
+}
+
+bool exibirErroDaApi(Object erro, StackTrace stackTrace) {
+  if (erro is! ApiException) {
+    return false;
+  }
+
+  mensagensGlobais.currentState?.showSnackBar(
+    SnackBar(content: Text(erro.message)),
+  );
+  return true;
 }
 
 class MainApp extends StatelessWidget {
@@ -28,6 +42,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: AppConstants.nomeApp,
+      scaffoldMessengerKey: mensagensGlobais,
       debugShowCheckedModeBanner: false,
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,

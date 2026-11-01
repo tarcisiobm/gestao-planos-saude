@@ -1,4 +1,5 @@
 using GestaoPlanosSaude.Application.Common;
+using GestaoPlanosSaude.Domain.Exceptions;
 
 namespace GestaoPlanosSaude.Api.Middleware;
 
@@ -9,6 +10,20 @@ public sealed class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorH
         try
         {
             await next(context);
+        }
+        catch (DadosInvalidosException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            var resultado = ResultWrapper<object>.Fail("Dados inválidos.", exception.Message);
+            await context.Response.WriteAsJsonAsync(resultado);
+        }
+        catch (RegistroVinculadoException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            var resultado = ResultWrapper<object>.Fail(
+                "Não foi possível excluir o registro.",
+                exception.Message);
+            await context.Response.WriteAsJsonAsync(resultado);
         }
         catch (Exception exception)
         {

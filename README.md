@@ -2,7 +2,7 @@
 
 Sistema acadêmico composto por um aplicativo Flutter e uma API REST em ASP.NET Core para gerenciar clientes, dependentes, planos, prestadores, serviços, contratos, pagamentos, simulações e atendimentos.
 
-**Integrantes:** Tarcísio Mayara Pedro Gabriel
+**Integrantes:** Tarcísio, Mayara, Pedro e Gabriel
 
 ## Arquitetura
 
@@ -14,10 +14,35 @@ Flutter -> HTTP/JSON + JWT -> ASP.NET Core -> MySQL/MariaDB
 
 A solução `api/GestaoPlanosSaude.sln` está separada em:
 
-- `Domain`: entidades e contratos de repositórios;
+- `Domain`: entidades, exceções e contratos de repositórios;
 - `Application`: casos de uso, serviços e `ResultWrapper`;
 - `Infrastructure`: Dapper, MySQL, BCrypt e cache;
-- `Api`: controllers, Swagger, JWT e injeção de dependência.
+- `Api`: controllers, Swagger, JWT, tratamento de erros e injeção de dependência.
+
+Fluxo de uma requisição:
+
+```text
+Controller (Api) -> Service (Application) -> Repository (Infrastructure) -> MySQL
+```
+
+O controller recebe a requisição, chama o serviço da camada `Application` e devolve o resultado dentro do `ResultWrapper`. O acesso ao banco fica restrito aos repositórios da `Infrastructure`, que implementam as interfaces definidas no `Domain`.
+
+No Flutter:
+
+- `lib/data`: `ApiClient` (HTTP, token e tratamento das respostas) e repositórios que consomem a API;
+- `lib/domain`: modelos, interfaces de repositório e serviços usados pelas telas;
+- `lib/presentation`: telas e navegação.
+
+Erros retornados pela API são convertidos em `ApiException` e exibidos ao usuário em uma mensagem na tela.
+
+## Decisões técnicas
+
+- **Dapper**: consultas SQL explícitas e mapeamento simples, aproveitando o banco já existente do aplicativo anterior;
+- **Repositórios genéricos**: o CRUD comum fica em `DapperRepository<T>`; cada repositório define apenas seu SQL;
+- **Middleware de erros**: exceções viram respostas no padrão `ResultWrapper`, sem expor detalhes internos;
+- **`IMemoryCache` na listagem de planos**: dado consultado com frequência e alterado raramente; como a API roda em uma única instância, não há necessidade de cache distribuído;
+- **JWT sem estado**: a API não guarda sessão; cada requisição é validada pelo token;
+- **`flutter_secure_storage`**: o token é salvo no armazenamento seguro do dispositivo, não em texto puro.
 
 ## Tecnologias
 
@@ -90,6 +115,14 @@ A API deve estar em execução antes de abrir o aplicativo.
 
 Na primeira utilização, abra **Registre-se** e crie um usuário com senha de pelo menos seis caracteres. O token retornado no login é salvo pelo armazenamento seguro da plataforma e enviado como `Bearer` nas requisições protegidas.
 
+## Autenticação
+
+- `POST /api/auth/cadastro` grava a senha com hash BCrypt;
+- `POST /api/auth/login` valida a senha e gera um JWT assinado com HMAC SHA-256, válido por 120 minutos;
+- o token contém id, e-mail e nome do usuário;
+- todos os endpoints, exceto cadastro e login, exigem o cabeçalho `Authorization: Bearer <token>`;
+- a API valida emissor, público, assinatura e expiração do token.
+
 ## Respostas da API
 
 Todos os controllers retornam a estrutura:
@@ -102,6 +135,16 @@ Todos os controllers retornam a estrutura:
   "errors": []
 }
 ```
+
+Códigos utilizados:
+
+- `200`/`201`: sucesso;
+- `400`: dados inválidos (JSON inválido, campo acima do tamanho permitido ou registro relacionado inexistente);
+- `401`: token ausente, inválido ou expirado;
+- `404`: registro ou rota não encontrados;
+- `405`: método HTTP não permitido;
+- `409`: e-mail já cadastrado ou registro com vínculos (exemplo: cliente com contratos);
+- `500`: erro interno, registrado no log da API.
 
 ## Endpoints principais
 

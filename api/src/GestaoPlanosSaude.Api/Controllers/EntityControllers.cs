@@ -1,7 +1,6 @@
 using GestaoPlanosSaude.Application.Common;
 using GestaoPlanosSaude.Application.Services;
 using GestaoPlanosSaude.Domain.Entities;
-using GestaoPlanosSaude.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestaoPlanosSaude.Api.Controllers;
@@ -45,12 +44,12 @@ public sealed class PagamentosController(ICrudService<Pagamento> service)
 [Route("api/servicos")]
 public sealed class ServicosController(
     ICrudService<Servico> service,
-    IServicoRepository repository) : CrudController<Servico>(service)
+    ServicoService servicoService) : CrudController<Servico>(service)
 {
     [HttpGet("por-plano/{planoId:int}")]
     public async Task<ActionResult<ResultWrapper<IReadOnlyList<Servico>>>> PorPlano(int planoId)
     {
-        var servicos = await repository.ListarPorPlanoAsync(planoId);
+        var servicos = await servicoService.ListarPorPlanoAsync(planoId);
         return Ok(ResultWrapper<IReadOnlyList<Servico>>.Ok(servicos));
     }
 }
@@ -58,12 +57,12 @@ public sealed class ServicosController(
 [Route("api/faixas-valor")]
 public sealed class FaixasValorController(
     ICrudService<FaixaValor> service,
-    IFaixaValorRepository repository) : CrudController<FaixaValor>(service)
+    FaixaValorService faixaValorService) : CrudController<FaixaValor>(service)
 {
     [HttpGet("por-plano/{planoId:int}")]
     public async Task<ActionResult<ResultWrapper<IReadOnlyList<FaixaValor>>>> PorPlano(int planoId)
     {
-        var faixas = await repository.ListarPorPlanoAsync(planoId);
+        var faixas = await faixaValorService.ListarPorPlanoAsync(planoId);
         return Ok(ResultWrapper<IReadOnlyList<FaixaValor>>.Ok(faixas));
     }
 
@@ -72,7 +71,7 @@ public sealed class FaixasValorController(
         [FromQuery] int planoId,
         [FromQuery] int idade)
     {
-        var faixa = await repository.ObterPorIdadeAsync(planoId, idade);
+        var faixa = await faixaValorService.ObterPorIdadeAsync(planoId, idade);
         if (faixa is null)
         {
             return NotFound(ResultWrapper<decimal>.Fail("Nenhuma faixa cobre a idade informada."));
@@ -85,12 +84,12 @@ public sealed class FaixasValorController(
 [Route("api/atendimentos")]
 public sealed class AtendimentosController(
     ICrudService<Atendimento> service,
-    IAtendimentoRepository repository) : CrudController<Atendimento>(service)
+    AtendimentoService atendimentoService) : CrudController<Atendimento>(service)
 {
     [HttpGet("por-cliente/{clienteId:int}")]
     public async Task<ActionResult<ResultWrapper<IReadOnlyList<Atendimento>>>> PorCliente(int clienteId)
     {
-        var atendimentos = await repository.ListarPorClienteAsync(clienteId);
+        var atendimentos = await atendimentoService.ListarPorClienteAsync(clienteId);
         return Ok(ResultWrapper<IReadOnlyList<Atendimento>>.Ok(atendimentos));
     }
 }

@@ -45,6 +45,35 @@ public class CrudService<T>(IRepository<T> repository) : ICrudService<T> where T
     }
 }
 
+public sealed class ServicoService(IServicoRepository repository)
+{
+    public Task<IReadOnlyList<Servico>> ListarPorPlanoAsync(int planoId)
+    {
+        return repository.ListarPorPlanoAsync(planoId);
+    }
+}
+
+public sealed class FaixaValorService(IFaixaValorRepository repository)
+{
+    public Task<IReadOnlyList<FaixaValor>> ListarPorPlanoAsync(int planoId)
+    {
+        return repository.ListarPorPlanoAsync(planoId);
+    }
+
+    public Task<FaixaValor?> ObterPorIdadeAsync(int planoId, int idade)
+    {
+        return repository.ObterPorIdadeAsync(planoId, idade);
+    }
+}
+
+public sealed class AtendimentoService(IAtendimentoRepository repository)
+{
+    public Task<IReadOnlyList<Atendimento>> ListarPorClienteAsync(int clienteId)
+    {
+        return repository.ListarPorClienteAsync(clienteId);
+    }
+}
+
 public sealed record SimulacaoResultado(
     decimal ValorTotal,
     decimal ValorFaixa,
@@ -126,17 +155,7 @@ public sealed class AuthService(
             return null;
         }
 
-        var senhaValida = passwordHasher.Verificar(request.Senha, usuario.SenhaHash);
-        if (!senhaValida)
-        {
-            senhaValida = await usuarioRepository.ValidarSenhaLegadaAsync(usuario.Id, request.Senha);
-            if (senhaValida)
-            {
-                var senhaHash = passwordHasher.CriarHash(request.Senha);
-                await usuarioRepository.AtualizarSenhaHashAsync(usuario.Id, senhaHash);
-            }
-        }
-
+        var senhaValida = await ValidarSenhaAsync(usuario, request.Senha);
         if (!senhaValida)
         {
             return null;
@@ -144,6 +163,25 @@ public sealed class AuthService(
 
         var token = tokenService.Gerar(usuario);
         return new(usuario.Id, usuario.Nome, usuario.Email, token);
+    }
+
+    private async Task<bool> ValidarSenhaAsync(Usuario usuario, string senha)
+    {
+        var senhaHashValida = passwordHasher.Verificar(senha, usuario.SenhaHash);
+        if (senhaHashValida)
+        {
+            return true;
+        }
+
+        var senhaLegadaValida = await usuarioRepository.ValidarSenhaLegadaAsync(usuario.Id, senha);
+        if (!senhaLegadaValida)
+        {
+            return false;
+        }
+
+        var senhaHash = passwordHasher.CriarHash(senha);
+        await usuarioRepository.AtualizarSenhaHashAsync(usuario.Id, senhaHash);
+        return true;
     }
 
     public async Task<int> CadastrarAsync(CadastroUsuarioRequest request)

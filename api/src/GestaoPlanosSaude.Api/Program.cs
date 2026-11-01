@@ -82,6 +82,9 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<SimulacaoService>();
+builder.Services.AddScoped<ServicoService>();
+builder.Services.AddScoped<FaixaValorService>();
+builder.Services.AddScoped<AtendimentoService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
@@ -121,6 +124,17 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseStatusCodePages(async statusCodeContext =>
+{
+    var response = statusCodeContext.HttpContext.Response;
+    var mensagem = "Recurso não encontrado.";
+    if (response.StatusCode == StatusCodes.Status405MethodNotAllowed)
+    {
+        mensagem = "Método HTTP não permitido.";
+    }
+
+    await response.WriteAsJsonAsync(ResultWrapper<object>.Fail(mensagem));
+});
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAuthentication();

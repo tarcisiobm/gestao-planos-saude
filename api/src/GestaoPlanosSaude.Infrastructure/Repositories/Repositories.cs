@@ -1,7 +1,9 @@
 using Dapper;
 using GestaoPlanosSaude.Domain.Entities;
+using GestaoPlanosSaude.Domain.Exceptions;
 using GestaoPlanosSaude.Domain.Repositories;
 using GestaoPlanosSaude.Infrastructure.Data;
+using MySqlConnector;
 
 namespace GestaoPlanosSaude.Infrastructure.Repositories;
 
@@ -45,14 +47,40 @@ public abstract class DapperRepository<T>(IDbConnectionFactory factory) : IRepos
         var sql = $"{InsertSql}; SELECT LAST_INSERT_ID();";
 
         await using var connection = Factory.Criar();
-        return await connection.ExecuteScalarAsync<int>(sql, entidade);
+        try
+        {
+            return await connection.ExecuteScalarAsync<int>(sql, entidade);
+        }
+        catch (MySqlException exception)
+        {
+            var erroDeDados = CriarErroDeDados(exception);
+            if (erroDeDados is null)
+            {
+                throw;
+            }
+
+            throw erroDeDados;
+        }
     }
 
     public async Task<bool> AtualizarAsync(T entidade)
     {
         await using var connection = Factory.Criar();
-        var registrosAlterados = await connection.ExecuteAsync(UpdateSql, entidade);
-        return registrosAlterados > 0;
+        try
+        {
+            var registrosAlterados = await connection.ExecuteAsync(UpdateSql, entidade);
+            return registrosAlterados > 0;
+        }
+        catch (MySqlException exception)
+        {
+            var erroDeDados = CriarErroDeDados(exception);
+            if (erroDeDados is null)
+            {
+                throw;
+            }
+
+            throw erroDeDados;
+        }
     }
 
     public async Task<bool> ExcluirAsync(int id)
@@ -60,8 +88,28 @@ public abstract class DapperRepository<T>(IDbConnectionFactory factory) : IRepos
         var sql = $"DELETE FROM {TableName} WHERE id = @Id";
 
         await using var connection = Factory.Criar();
-        var registrosExcluidos = await connection.ExecuteAsync(sql, new { Id = id });
-        return registrosExcluidos > 0;
+        try
+        {
+            var registrosExcluidos = await connection.ExecuteAsync(sql, new { Id = id });
+            return registrosExcluidos > 0;
+        }
+        catch (MySqlException exception) when (exception.ErrorCode == MySqlErrorCode.RowIsReferenced2)
+        {
+            throw new RegistroVinculadoException();
+        }
+    }
+
+    private static DadosInvalidosException? CriarErroDeDados(MySqlException exception)
+    {
+        switch (exception.ErrorCode)
+        {
+            case MySqlErrorCode.DataTooLong:
+                return new("Um ou mais campos excedem o tamanho permitido.");
+            case MySqlErrorCode.NoReferencedRow2:
+                return new("O registro relacionado informado não existe.");
+            default:
+                return null;
+        }
     }
 }
 

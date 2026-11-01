@@ -65,8 +65,7 @@ public sealed class CachedPlanoService(
                 return 0;
             }
 
-            cache.Remove(CacheKey);
-            logger.LogInformation("Cache de planos invalidado após gravação.");
+            InvalidarCache("gravação");
             return novoId;
         }
 
@@ -76,8 +75,7 @@ public sealed class CachedPlanoService(
             return 0;
         }
 
-        cache.Remove(CacheKey);
-        logger.LogInformation("Cache de planos invalidado após gravação.");
+        InvalidarCache("gravação");
         return plano.Id;
     }
 
@@ -89,8 +87,13 @@ public sealed class CachedPlanoService(
             return false;
         }
 
+        InvalidarCache("exclusão");
+        return true;
+    }
+
+    private void InvalidarCache(string operacao)
+    {
         cache.Remove(CacheKey);
-        logger.LogInformation("Cache de planos invalidado após exclusão.");
-        return excluido;
+        logger.LogInformation("Cache de planos invalidado após {Operacao}.", operacao);
     }
 }
