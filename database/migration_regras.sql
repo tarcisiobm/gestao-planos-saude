@@ -39,7 +39,3 @@ UPDATE atendimento SET data = COALESCE(
   STR_TO_DATE(data, '%d/%m/%Y'),
   CURDATE());
 ALTER TABLE atendimento MODIFY data DATE NOT NULL;
-
-ALTER TABLE atendimento
-  ADD COLUMN dependente_id INT NULL AFTER cliente_id,
-  ADD FOREIGN KEY (dependente_id) REFERENCES dependente(id);

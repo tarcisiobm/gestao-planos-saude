@@ -73,9 +73,12 @@ Para atualizar um banco da versão antiga, faça backup e execute:
 ```bash
 mysql -u root -p < database/migration_api.sql
 mysql -u root -p < database/migration_regras.sql
+mysql -u root -p < database/migration_atendimento_dependente.sql
 ```
 
 A `migration_regras.sql` converte as datas de texto para `DATE`, cria as datas de nascimento e o valor mensal do contrato e vincula cada pagamento a um contrato do cliente. Pagamentos de clientes sem contrato são removidos. Depois de executá-la, informe a data de nascimento dos clientes e dependentes e salve os contratos novamente para calcular o valor mensal.
+
+A `migration_atendimento_dependente.sql` permite registrar atendimentos de dependentes.
 
 A migração da API mantém o endereço antigo no campo `rua`. Os demais campos devem ser revisados. No primeiro login de um usuário antigo, a API valida a credencial legada uma única vez, grava o hash BCrypt e apaga a senha em texto puro.
 
