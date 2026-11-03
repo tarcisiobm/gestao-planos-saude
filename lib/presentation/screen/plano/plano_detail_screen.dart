@@ -191,7 +191,6 @@ class _PlanoDetailScreenState extends State<PlanoDetailScreen> {
             title: Text(_plano.tipoCobertura),
             subtitle: Text(
               'Mensalidade base: R\$ ${_plano.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda)}\n'
-              'Dependente: R\$ ${_plano.valorDependente.toStringAsFixed(AppConstants.casasDecimaisMoeda)}\n'
               '${_plano.vigencia} · ${_plano.formaPagamento}',
             ),
           ),

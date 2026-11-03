@@ -4,6 +4,7 @@ import '../../../app_constants.dart';
 import '../../../domain/models/pagamento.dart';
 import '../../../domain/services/pagamento_service.dart';
 import '../../constants/opcoes_menu_lista.dart';
+import '../../widgets/campo_data.dart';
 import '../../../routes.dart';
 
 class PagamentoListScreen extends StatefulWidget {
@@ -87,9 +88,7 @@ class _PagamentoListScreenState extends State<PagamentoListScreen> {
                 final pagamento = _pagamentos[indice];
                 return ListTile(
                   title: Text(pagamento.clienteNome),
-                  subtitle: Text(
-                    'R\$ ${pagamento.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda)} — ${pagamento.status} (vence ${pagamento.vencimento})',
-                  ),
+                  subtitle: Text(_descreverPagamento(pagamento)),
                   onTap: () => _abrirForm(pagamento),
                   trailing: PopupMenuButton<OpcaoMenuLista>(
                     onSelected: (opcao) {
@@ -113,5 +112,19 @@ class _PagamentoListScreenState extends State<PagamentoListScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  String _descreverPagamento(Pagamento pagamento) {
+    final valor = pagamento.valor.toStringAsFixed(
+      AppConstants.casasDecimaisMoeda,
+    );
+    final vencimento = formatarData(pagamento.vencimento);
+    final descricao =
+        '${pagamento.planoNome}\nR\$ $valor - ${pagamento.status} (vence $vencimento)';
+    if (pagamento.diasAtraso == 0) {
+      return descricao;
+    }
+
+    return '$descricao - ${pagamento.diasAtraso} dia(s) de atraso';
   }
 }

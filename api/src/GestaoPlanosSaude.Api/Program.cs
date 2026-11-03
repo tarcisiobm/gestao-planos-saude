@@ -17,6 +17,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 DefaultTypeMap.MatchNamesWithUnderscores = true;
+SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
 builder.Services
     .AddControllers()
@@ -67,7 +68,9 @@ builder.Services.AddScoped<IRepository<Cliente>, ClienteRepository>();
 builder.Services.AddScoped<IRepository<Plano>, PlanoRepository>();
 builder.Services.AddScoped<IRepository<Prestador>, PrestadorRepository>();
 builder.Services.AddScoped<IRepository<Dependente>, DependenteRepository>();
+builder.Services.AddScoped<IDependenteRepository, DependenteRepository>();
 builder.Services.AddScoped<IRepository<Contrato>, ContratoRepository>();
+builder.Services.AddScoped<IContratoRepository, ContratoRepository>();
 builder.Services.AddScoped<IRepository<Pagamento>, PagamentoRepository>();
 builder.Services.AddScoped<IRepository<Servico>, ServicoRepository>();
 builder.Services.AddScoped<IRepository<FaixaValor>, FaixaValorRepository>();
@@ -81,10 +84,14 @@ builder.Services.AddScoped<ICrudService<Plano>, CachedPlanoService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MensalidadeService>();
 builder.Services.AddScoped<SimulacaoService>();
 builder.Services.AddScoped<ServicoService>();
 builder.Services.AddScoped<FaixaValorService>();
 builder.Services.AddScoped<AtendimentoService>();
+builder.Services.AddScoped<ContratoService>();
+builder.Services.AddScoped<ICrudService<Pagamento>, PagamentoService>();
+builder.Services.AddHostedService<RenovacaoContratosWorker>();
 
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app_constants.dart';
 import '../../../domain/constants/status.dart';
 import '../../../domain/models/cliente.dart';
 import '../../../domain/models/contrato.dart';
@@ -7,6 +8,7 @@ import '../../../domain/models/plano.dart';
 import '../../../domain/services/cliente_service.dart';
 import '../../../domain/services/contrato_service.dart';
 import '../../../domain/services/plano_service.dart';
+import '../../widgets/campo_data.dart';
 
 class ContratoFormScreen extends StatefulWidget {
   const ContratoFormScreen({super.key});
@@ -20,8 +22,8 @@ class _ContratoFormScreenState extends State<ContratoFormScreen> {
   final _clienteService = ClienteService();
   final _planoService = PlanoService();
   late final Contrato _contrato;
-  late final TextEditingController _dataInicio;
-  late final TextEditingController _validade;
+  String _dataInicio = '';
+  String _validade = '';
   List<Cliente> _clientes = [];
   List<Plano> _planos = [];
   int? _clienteId;
@@ -38,8 +40,8 @@ class _ContratoFormScreenState extends State<ContratoFormScreen> {
     _iniciado = true;
     final argumento = ModalRoute.of(context)?.settings.arguments;
     _contrato = argumento is Contrato ? argumento : Contrato();
-    _dataInicio = TextEditingController(text: _contrato.dataInicio);
-    _validade = TextEditingController(text: _contrato.validade);
+    _dataInicio = _contrato.dataInicio;
+    _validade = _contrato.validade;
     _clienteId = _contrato.clienteId;
     _planoId = _contrato.planoId;
     _status = _contrato.status;
@@ -57,15 +59,6 @@ class _ContratoFormScreenState extends State<ContratoFormScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    if (_iniciado) {
-      _dataInicio.dispose();
-      _validade.dispose();
-    }
-    super.dispose();
-  }
-
   Future<void> _salvar() async {
     if (_clienteId == null || _planoId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,10 +66,16 @@ class _ContratoFormScreenState extends State<ContratoFormScreen> {
       );
       return;
     }
+    if (_dataInicio.isEmpty || _validade.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informe a data de início e a validade')),
+      );
+      return;
+    }
     _contrato.clienteId = _clienteId;
     _contrato.planoId = _planoId;
-    _contrato.dataInicio = _dataInicio.text;
-    _contrato.validade = _validade.text;
+    _contrato.dataInicio = _dataInicio;
+    _contrato.validade = _validade;
     _contrato.status = _status;
     _contrato.renovacaoAutomatica = _renovacao;
     await _service.salvar(_contrato);
@@ -130,8 +129,16 @@ class _ContratoFormScreenState extends State<ContratoFormScreen> {
             onChanged: (planoId) => setState(() => _planoId = planoId),
           ),
           const SizedBox(height: 12),
-          _campo(_dataInicio, 'Data de início'),
-          _campo(_validade, 'Validade'),
+          CampoData(
+            label: 'Data de início',
+            valor: _dataInicio,
+            onChanged: (data) => setState(() => _dataInicio = data),
+          ),
+          CampoData(
+            label: 'Validade',
+            valor: _validade,
+            onChanged: (data) => setState(() => _validade = data),
+          ),
           DropdownButtonFormField<String>(
             initialValue: _status,
             decoration: const InputDecoration(
@@ -153,22 +160,16 @@ class _ContratoFormScreenState extends State<ContratoFormScreen> {
             value: _renovacao,
             onChanged: (renovacao) => setState(() => _renovacao = renovacao),
           ),
+          if (editando)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                'Valor mensal: R\$ ${_contrato.valorMensal.toStringAsFixed(AppConstants.casasDecimaisMoeda)}',
+              ),
+            ),
           const SizedBox(height: 8),
           ElevatedButton(onPressed: _salvar, child: const Text('Salvar')),
         ],
-      ),
-    );
-  }
-
-  Widget _campo(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
       ),
     );
   }

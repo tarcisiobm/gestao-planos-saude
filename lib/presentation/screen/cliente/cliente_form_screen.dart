@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/models/cliente.dart';
 import '../../../domain/services/cliente_service.dart';
+import '../../widgets/campo_data.dart';
 
 class ClienteFormScreen extends StatefulWidget {
   const ClienteFormScreen({super.key});
@@ -24,6 +25,7 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
   late final TextEditingController _cidade;
   late final TextEditingController _estado;
   late final TextEditingController _cep;
+  String _dataNascimento = '';
   bool _iniciado = false;
 
   @override
@@ -44,6 +46,7 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
     _cidade = TextEditingController(text: _cliente.cidade);
     _estado = TextEditingController(text: _cliente.estado);
     _cep = TextEditingController(text: _cliente.cep);
+    _dataNascimento = _cliente.dataNascimento;
   }
 
   @override
@@ -65,7 +68,14 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
   }
 
   Future<void> _salvar() async {
+    if (_dataNascimento.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informe a data de nascimento')),
+      );
+      return;
+    }
     _cliente.nome = _nome.text;
+    _cliente.dataNascimento = _dataNascimento;
     _cliente.cpf = _cpf.text;
     _cliente.telefone = _telefone.text;
     _cliente.email = _email.text;
@@ -92,6 +102,11 @@ class _ClienteFormScreenState extends State<ClienteFormScreen> {
           _campo(_cpf, 'CPF'),
           _campo(_telefone, 'Telefone'),
           _campo(_email, 'E-mail'),
+          CampoData(
+            label: 'Data de nascimento',
+            valor: _dataNascimento,
+            onChanged: (data) => setState(() => _dataNascimento = data),
+          ),
           _campo(_rua, 'Rua'),
           _campo(_numero, 'Número'),
           _campo(_complemento, 'Complemento'),

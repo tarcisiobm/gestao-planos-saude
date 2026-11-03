@@ -72,9 +72,12 @@ Para atualizar um banco da versão antiga, faça backup e execute:
 
 ```bash
 mysql -u root -p < database/migration_api.sql
+mysql -u root -p < database/migration_regras.sql
 ```
 
-A migração mantém o endereço antigo no campo `rua`. Os demais campos devem ser revisados. No primeiro login de um usuário antigo, a API valida a credencial legada uma única vez, grava o hash BCrypt e apaga a senha em texto puro.
+A `migration_regras.sql` converte as datas de texto para `DATE`, cria as datas de nascimento e o valor mensal do contrato e vincula cada pagamento a um contrato do cliente. Pagamentos de clientes sem contrato são removidos. Depois de executá-la, informe a data de nascimento dos clientes e dependentes e salve os contratos novamente para calcular o valor mensal.
+
+A migração da API mantém o endereço antigo no campo `rua`. Os demais campos devem ser revisados. No primeiro login de um usuário antigo, a API valida a credencial legada uma única vez, grava o hash BCrypt e apaga a senha em texto puro.
 
 ## Executar a API
 
@@ -139,12 +142,22 @@ Todos os controllers retornam a estrutura:
 Códigos utilizados:
 
 - `200`/`201`: sucesso;
-- `400`: dados inválidos (JSON inválido, campo acima do tamanho permitido ou registro relacionado inexistente);
+- `400`: dados inválidos (JSON inválido, campo acima do tamanho permitido, registro relacionado inexistente ou regra de negócio não atendida);
 - `401`: token ausente, inválido ou expirado;
 - `404`: registro ou rota não encontrados;
 - `405`: método HTTP não permitido;
 - `409`: e-mail já cadastrado ou registro com vínculos (exemplo: cliente com contratos);
 - `500`: erro interno, registrado no log da API.
+
+## Regras de negócio
+
+- Clientes e dependentes possuem data de nascimento; a idade é calculada a partir dela.
+- O valor mensal do contrato é a soma da faixa de valor do titular e de cada dependente, conforme a idade de cada um. Ele é calculado ao salvar o contrato.
+- A simulação recebe a idade do titular e de cada dependente e retorna o total e o valor por pessoa.
+- Na renovação, contratos vencidos com renovação automática ganham nova validade e têm as idades e o valor recalculados; os demais passam para `Vencido`. A API executa a renovação ao iniciar e a cada 24 horas, e também pelo endpoint `POST /api/contratos/renovacoes`.
+- O pagamento pertence a um contrato. Sem valor informado, usa o valor mensal do contrato. Um pagamento não pago com vencimento passado é retornado como `Atrasado`, com os dias de atraso.
+- O atendimento só é aceito se o cliente tiver contrato ativo com o plano do serviço na data do atendimento.
+- Datas são enviadas e retornadas no formato `yyyy-MM-dd`.
 
 ## Endpoints principais
 
@@ -154,7 +167,14 @@ Códigos utilizados:
 - `GET /api/servicos/por-plano/{planoId}`;
 - `GET /api/faixas-valor/por-plano/{planoId}`;
 - `GET /api/atendimentos/por-cliente/{clienteId}`;
+- `POST /api/contratos/renovacoes` processa os contratos vencidos;
 - `POST /api/simulacoes` executa o cálculo no servidor.
+
+Exemplo de simulação:
+
+```json
+{ "plano_id": 1, "idade_titular": 60, "idades_dependentes": [5, 61] }
+```
 
 Exemplo de login:
 

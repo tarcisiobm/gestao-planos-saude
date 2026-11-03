@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../app_constants.dart';
 import '../../../domain/models/contrato.dart';
 import '../../../domain/services/contrato_service.dart';
 import '../../constants/opcoes_menu_lista.dart';
+import '../../widgets/campo_data.dart';
 import '../../../routes.dart';
 
 class ContratoListScreen extends StatefulWidget {
@@ -106,10 +108,9 @@ class _ContratoListScreenState extends State<ContratoListScreen> {
                         ),
                         for (final contrato in grupo.value)
                           ListTile(
+                            isThreeLine: true,
                             title: Text(contrato.planoNome),
-                            subtitle: Text(
-                              '${contrato.status} - início ${contrato.dataInicio}',
-                            ),
+                            subtitle: Text(_descreverContrato(contrato)),
                             onTap: () => _abrirForm(contrato),
                             trailing: PopupMenuButton<OpcaoMenuLista>(
                               onSelected: (opcao) {
@@ -134,5 +135,14 @@ class _ContratoListScreenState extends State<ContratoListScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  String _descreverContrato(Contrato contrato) {
+    final valorMensal = contrato.valorMensal.toStringAsFixed(
+      AppConstants.casasDecimaisMoeda,
+    );
+    final inicio = formatarData(contrato.dataInicio);
+    final validade = formatarData(contrato.validade);
+    return '${contrato.status} - R\$ $valorMensal/mês\n$inicio a $validade';
   }
 }

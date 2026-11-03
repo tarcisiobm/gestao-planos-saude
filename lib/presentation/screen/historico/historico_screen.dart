@@ -5,6 +5,7 @@ import '../../../domain/models/cliente.dart';
 import '../../../domain/services/atendimento_service.dart';
 import '../../../domain/services/cliente_service.dart';
 import '../../constants/opcoes_menu_lista.dart';
+import '../../widgets/campo_data.dart';
 import '../../../routes.dart';
 
 class HistoricoScreen extends StatefulWidget {
@@ -135,7 +136,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                         isThreeLine: true,
                         title: Text(atendimento.clienteNome),
                         subtitle: Text(
-                          '${atendimento.data} ${atendimento.horario} - ${atendimento.servicoNome}\n'
+                          '${formatarData(atendimento.data)} ${atendimento.horario} - ${atendimento.servicoNome}\n'
                           '${atendimento.planoNome} · ${atendimento.prestadorNome}\n'
                           '${atendimento.descricao}',
                         ),

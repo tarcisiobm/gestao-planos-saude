@@ -30,9 +30,16 @@ public sealed class DependentesController(ICrudService<Dependente> service)
 }
 
 [Route("api/contratos")]
-public sealed class ContratosController(ICrudService<Contrato> service)
+public sealed class ContratosController(ContratoService service)
     : CrudController<Contrato>(service)
 {
+    [HttpPost("renovacoes")]
+    public async Task<ActionResult<ResultWrapper<RenovacaoResultado>>> RenovarVencidos()
+    {
+        var hoje = DateOnly.FromDateTime(DateTime.Today);
+        var resultado = await service.RenovarVencidosAsync(hoje);
+        return Ok(ResultWrapper<RenovacaoResultado>.Ok(resultado, "Renovação de contratos processada."));
+    }
 }
 
 [Route("api/pagamentos")]
@@ -82,14 +89,13 @@ public sealed class FaixasValorController(
 }
 
 [Route("api/atendimentos")]
-public sealed class AtendimentosController(
-    ICrudService<Atendimento> service,
-    AtendimentoService atendimentoService) : CrudController<Atendimento>(service)
+public sealed class AtendimentosController(AtendimentoService service)
+    : CrudController<Atendimento>(service)
 {
     [HttpGet("por-cliente/{clienteId:int}")]
     public async Task<ActionResult<ResultWrapper<IReadOnlyList<Atendimento>>>> PorCliente(int clienteId)
     {
-        var atendimentos = await atendimentoService.ListarPorClienteAsync(clienteId);
+        var atendimentos = await service.ListarPorClienteAsync(clienteId);
         return Ok(ResultWrapper<IReadOnlyList<Atendimento>>.Ok(atendimentos));
     }
 }

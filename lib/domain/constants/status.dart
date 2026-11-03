@@ -10,5 +10,5 @@ class StatusPagamento {
   static const pendente = 'Pendente';
   static const atrasado = 'Atrasado';
 
-  static const todos = [pago, pendente, atrasado];
+  static const selecionaveis = [pago, pendente];
 }

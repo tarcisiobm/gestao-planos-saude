@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../app_constants.dart';
 import '../../../domain/constants/status.dart';
-import '../../../domain/models/cliente.dart';
+import '../../../domain/models/contrato.dart';
 import '../../../domain/models/pagamento.dart';
-import '../../../domain/services/cliente_service.dart';
+import '../../../domain/services/contrato_service.dart';
 import '../../../domain/services/pagamento_service.dart';
+import '../../widgets/campo_data.dart';
 
 class PagamentoFormScreen extends StatefulWidget {
   const PagamentoFormScreen({super.key});
@@ -16,12 +17,12 @@ class PagamentoFormScreen extends StatefulWidget {
 
 class _PagamentoFormScreenState extends State<PagamentoFormScreen> {
   final _service = PagamentoService();
-  final _clienteService = ClienteService();
+  final _contratoService = ContratoService();
   late final Pagamento _pagamento;
   late final TextEditingController _valor;
-  late final TextEditingController _vencimento;
-  List<Cliente> _clientes = [];
-  int? _clienteId;
+  String _vencimento = '';
+  List<Contrato> _contratos = [];
+  int? _contratoId;
   String _status = StatusPagamento.pendente;
   bool _iniciado = false;
   bool _carregando = true;
@@ -38,16 +39,18 @@ class _PagamentoFormScreenState extends State<PagamentoFormScreen> {
           ? ''
           : _pagamento.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda),
     );
-    _vencimento = TextEditingController(text: _pagamento.vencimento);
-    _clienteId = _pagamento.clienteId;
-    _status = _pagamento.status;
-    _carregarClientes();
+    _vencimento = _pagamento.vencimento;
+    _contratoId = _pagamento.contratoId;
+    if (_pagamento.status == StatusPagamento.pago) {
+      _status = StatusPagamento.pago;
+    }
+    _carregarContratos();
   }
 
-  Future<void> _carregarClientes() async {
-    final clientes = await _clienteService.findAll();
+  Future<void> _carregarContratos() async {
+    final contratos = await _contratoService.findAll();
     setState(() {
-      _clientes = clientes;
+      _contratos = contratos;
       _carregando = false;
     });
   }
@@ -56,21 +59,20 @@ class _PagamentoFormScreenState extends State<PagamentoFormScreen> {
   void dispose() {
     if (_iniciado) {
       _valor.dispose();
-      _vencimento.dispose();
     }
     super.dispose();
   }
 
   Future<void> _salvar() async {
-    if (_clienteId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecione o cliente')));
+    if (_contratoId == null || _vencimento.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione o contrato e o vencimento')),
+      );
       return;
     }
-    _pagamento.clienteId = _clienteId;
+    _pagamento.contratoId = _contratoId;
     _pagamento.valor = double.tryParse(_valor.text.replaceAll(',', '.')) ?? 0;
-    _pagamento.vencimento = _vencimento.text;
+    _pagamento.vencimento = _vencimento;
     _pagamento.status = _status;
     await _service.salvar(_pagamento);
     if (mounted) Navigator.pop(context);
@@ -90,31 +92,42 @@ class _PagamentoFormScreenState extends State<PagamentoFormScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           DropdownButtonFormField<int>(
-            initialValue: _clienteId,
+            initialValue: _contratoId,
+            isExpanded: true,
             decoration: const InputDecoration(
-              labelText: 'Cliente',
+              labelText: 'Contrato',
               border: OutlineInputBorder(),
             ),
-            items: _clientes
+            items: _contratos
                 .map(
-                  (cliente) => DropdownMenuItem(
-                    value: cliente.id,
-                    child: Text(cliente.nome),
+                  (contrato) => DropdownMenuItem(
+                    value: contrato.id,
+                    child: Text(
+                      '${contrato.clienteNome} - ${contrato.planoNome}',
+                    ),
                   ),
                 )
                 .toList(),
-            onChanged: (clienteId) => setState(() => _clienteId = clienteId),
+            onChanged: (contratoId) => setState(() => _contratoId = contratoId),
           ),
           const SizedBox(height: 12),
-          _campo(_valor, 'Valor', numero: true),
-          _campo(_vencimento, 'Vencimento'),
+          _campo(
+            _valor,
+            'Valor (vazio usa a mensalidade do contrato)',
+            numero: true,
+          ),
+          CampoData(
+            label: 'Vencimento',
+            valor: _vencimento,
+            onChanged: (data) => setState(() => _vencimento = data),
+          ),
           DropdownButtonFormField<String>(
             initialValue: _status,
             decoration: const InputDecoration(
               labelText: 'Status',
               border: OutlineInputBorder(),
             ),
-            items: StatusPagamento.todos
+            items: StatusPagamento.selecionaveis
                 .map(
                   (status) =>
                       DropdownMenuItem(value: status, child: Text(status)),

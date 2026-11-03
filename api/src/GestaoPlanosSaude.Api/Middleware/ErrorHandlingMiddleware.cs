@@ -14,7 +14,9 @@ public sealed class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorH
         catch (DadosInvalidosException exception)
         {
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            var resultado = ResultWrapper<object>.Fail("Dados inválidos.", exception.Message);
+            var resultado = ResultWrapper<object>.Fail(
+                "Não foi possível concluir a operação.",
+                exception.Message);
             await context.Response.WriteAsJsonAsync(resultado);
         }
         catch (RegistroVinculadoException exception)

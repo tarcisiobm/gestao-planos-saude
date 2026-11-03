@@ -2,24 +2,28 @@ import '../constants/status.dart';
 
 class Pagamento {
   int? id;
-  int? clienteId;
+  int? contratoId;
   double valor;
   String vencimento;
   String status;
+  int diasAtraso;
   String clienteNome;
+  String planoNome;
 
   Pagamento({
     this.id,
-    this.clienteId,
+    this.contratoId,
     this.valor = 0,
     this.vencimento = '',
     this.status = StatusPagamento.pendente,
+    this.diasAtraso = 0,
     this.clienteNome = '',
+    this.planoNome = '',
   });
 
   Map<String, dynamic> toMap() => {
     'id': id,
-    'cliente_id': clienteId,
+    'contrato_id': contratoId,
     'valor': valor,
     'vencimento': vencimento,
     'status': status,
@@ -27,11 +31,13 @@ class Pagamento {
 
   static Pagamento fromMap(Map<String, dynamic> map) => Pagamento(
     id: map['id'] as int?,
-    clienteId: map['cliente_id'] as int?,
+    contratoId: map['contrato_id'] as int?,
     valor: _toDouble(map['valor']),
     vencimento: map['vencimento'] ?? '',
     status: map['status'] ?? StatusPagamento.pendente,
+    diasAtraso: map['dias_atraso'] as int? ?? 0,
     clienteNome: map['cliente_nome'] ?? '',
+    planoNome: map['plano_nome'] ?? '',
   );
 
   static double _toDouble(Object? value) {

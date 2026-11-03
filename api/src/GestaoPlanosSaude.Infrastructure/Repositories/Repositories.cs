@@ -1,6 +1,7 @@
 using Dapper;
 using GestaoPlanosSaude.Domain.Entities;
 using GestaoPlanosSaude.Domain.Exceptions;
+using GestaoPlanosSaude.Domain.Regras;
 using GestaoPlanosSaude.Domain.Repositories;
 using GestaoPlanosSaude.Infrastructure.Data;
 using MySqlConnector;
@@ -122,9 +123,9 @@ public sealed class ClienteRepository(IDbConnectionFactory factory)
     protected override string OrderBy => "nome";
     protected override string InsertSql => """
         INSERT INTO cliente
-            (nome, cpf, telefone, email, rua, numero, complemento, bairro, cidade, estado, cep)
+            (nome, cpf, telefone, email, data_nascimento, rua, numero, complemento, bairro, cidade, estado, cep)
         VALUES
-            (@Nome, @Cpf, @Telefone, @Email, @Rua, @Numero, @Complemento, @Bairro, @Cidade, @Estado, @Cep)
+            (@Nome, @Cpf, @Telefone, @Email, @DataNascimento, @Rua, @Numero, @Complemento, @Bairro, @Cidade, @Estado, @Cep)
         """;
     protected override string UpdateSql => """
         UPDATE cliente
@@ -132,6 +133,7 @@ public sealed class ClienteRepository(IDbConnectionFactory factory)
             cpf = @Cpf,
             telefone = @Telefone,
             email = @Email,
+            data_nascimento = @DataNascimento,
             rua = @Rua,
             numero = @Numero,
             complemento = @Complemento,
@@ -152,16 +154,15 @@ public sealed class PlanoRepository(IDbConnectionFactory factory)
     protected override string OrderBy => "nome";
     protected override string InsertSql => """
         INSERT INTO plano
-            (nome, tipo_cobertura, valor, valor_dependente, vigencia, forma_pagamento)
+            (nome, tipo_cobertura, valor, vigencia, forma_pagamento)
         VALUES
-            (@Nome, @TipoCobertura, @Valor, @ValorDependente, @Vigencia, @FormaPagamento)
+            (@Nome, @TipoCobertura, @Valor, @Vigencia, @FormaPagamento)
         """;
     protected override string UpdateSql => """
         UPDATE plano
         SET nome = @Nome,
             tipo_cobertura = @TipoCobertura,
             valor = @Valor,
-            valor_dependente = @ValorDependente,
             vigencia = @Vigencia,
             forma_pagamento = @FormaPagamento
         WHERE id = @Id
@@ -190,7 +191,7 @@ public sealed class PrestadorRepository(IDbConnectionFactory factory)
 }
 
 public sealed class DependenteRepository(IDbConnectionFactory factory)
-    : DapperRepository<Dependente>(factory)
+    : DapperRepository<Dependente>(factory), IDependenteRepository
 {
     protected override string TableName => "dependente";
     protected override string SelectSql => """
@@ -201,21 +202,31 @@ public sealed class DependenteRepository(IDbConnectionFactory factory)
     protected override string SearchWhere => "dependente.nome LIKE @Busca OR cliente.nome LIKE @Busca";
     protected override string OrderBy => "dependente.nome";
     protected override string InsertSql => """
-        INSERT INTO dependente (cliente_id, nome, cpf, parentesco)
-        VALUES (@ClienteId, @Nome, @Cpf, @Parentesco)
+        INSERT INTO dependente (cliente_id, nome, cpf, parentesco, data_nascimento)
+        VALUES (@ClienteId, @Nome, @Cpf, @Parentesco, @DataNascimento)
         """;
     protected override string UpdateSql => """
         UPDATE dependente
         SET cliente_id = @ClienteId,
             nome = @Nome,
             cpf = @Cpf,
-            parentesco = @Parentesco
+            parentesco = @Parentesco,
+            data_nascimento = @DataNascimento
         WHERE id = @Id
         """;
+
+    public async Task<IReadOnlyList<Dependente>> ListarPorClienteAsync(int clienteId)
+    {
+        var sql = $"{SelectSql} WHERE dependente.cliente_id = @ClienteId ORDER BY dependente.nome";
+
+        await using var connection = Factory.Criar();
+        var dependentes = await connection.QueryAsync<Dependente>(sql, new { ClienteId = clienteId });
+        return dependentes.AsList();
+    }
 }
 
 public sealed class ContratoRepository(IDbConnectionFactory factory)
-    : DapperRepository<Contrato>(factory)
+    : DapperRepository<Contrato>(factory), IContratoRepository
 {
     protected override string TableName => "contrato";
     protected override string SelectSql => """
@@ -227,9 +238,9 @@ public sealed class ContratoRepository(IDbConnectionFactory factory)
     protected override string SearchWhere => "cliente.nome LIKE @Busca OR plano.nome LIKE @Busca";
     protected override string InsertSql => """
         INSERT INTO contrato
-            (cliente_id, plano_id, data_inicio, validade, status, renovacao_automatica)
+            (cliente_id, plano_id, data_inicio, validade, status, renovacao_automatica, valor_mensal)
         VALUES
-            (@ClienteId, @PlanoId, @DataInicio, @Validade, @Status, @RenovacaoAutomatica)
+            (@ClienteId, @PlanoId, @DataInicio, @Validade, @Status, @RenovacaoAutomatica, @ValorMensal)
         """;
     protected override string UpdateSql => """
         UPDATE contrato
@@ -238,9 +249,43 @@ public sealed class ContratoRepository(IDbConnectionFactory factory)
             data_inicio = @DataInicio,
             validade = @Validade,
             status = @Status,
-            renovacao_automatica = @RenovacaoAutomatica
+            renovacao_automatica = @RenovacaoAutomatica,
+            valor_mensal = @ValorMensal
         WHERE id = @Id
         """;
+
+    public async Task<IReadOnlyList<Contrato>> ListarVencidosAtivosAsync(DateOnly dataReferencia)
+    {
+        var sql = $"{SelectSql} WHERE contrato.status = @Status AND contrato.validade < @DataReferencia";
+        var parametros = new { Status = StatusContrato.Ativo, DataReferencia = dataReferencia };
+
+        await using var connection = Factory.Criar();
+        var contratos = await connection.QueryAsync<Contrato>(sql, parametros);
+        return contratos.AsList();
+    }
+
+    public async Task<bool> PossuiContratoAtivoAsync(int clienteId, int planoId, DateOnly data)
+    {
+        const string sql = """
+            SELECT COUNT(*)
+            FROM contrato
+            WHERE cliente_id = @ClienteId
+              AND plano_id = @PlanoId
+              AND status = @Status
+              AND @Data BETWEEN data_inicio AND validade
+            """;
+        var parametros = new
+        {
+            ClienteId = clienteId,
+            PlanoId = planoId,
+            Status = StatusContrato.Ativo,
+            Data = data
+        };
+
+        await using var connection = Factory.Criar();
+        var total = await connection.ExecuteScalarAsync<int>(sql, parametros);
+        return total > 0;
+    }
 }
 
 public sealed class PagamentoRepository(IDbConnectionFactory factory)
@@ -248,18 +293,21 @@ public sealed class PagamentoRepository(IDbConnectionFactory factory)
 {
     protected override string TableName => "pagamento";
     protected override string SelectSql => """
-        SELECT pagamento.*, cliente.nome cliente_nome
+        SELECT pagamento.*, cliente.nome cliente_nome, plano.nome plano_nome
         FROM pagamento
-        LEFT JOIN cliente ON cliente.id = pagamento.cliente_id
+        LEFT JOIN contrato ON contrato.id = pagamento.contrato_id
+        LEFT JOIN cliente ON cliente.id = contrato.cliente_id
+        LEFT JOIN plano ON plano.id = contrato.plano_id
         """;
     protected override string SearchWhere => "cliente.nome LIKE @Busca";
+    protected override string OrderBy => "pagamento.vencimento DESC";
     protected override string InsertSql => """
-        INSERT INTO pagamento (cliente_id, valor, vencimento, status)
-        VALUES (@ClienteId, @Valor, @Vencimento, @Status)
+        INSERT INTO pagamento (contrato_id, valor, vencimento, status)
+        VALUES (@ContratoId, @Valor, @Vencimento, @Status)
         """;
     protected override string UpdateSql => """
         UPDATE pagamento
-        SET cliente_id = @ClienteId,
+        SET contrato_id = @ContratoId,
             valor = @Valor,
             vencimento = @Vencimento,
             status = @Status

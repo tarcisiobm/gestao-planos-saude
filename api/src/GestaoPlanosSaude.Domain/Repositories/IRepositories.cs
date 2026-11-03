@@ -34,3 +34,14 @@ public interface IAtendimentoRepository : IRepository<Atendimento>
 {
     Task<IReadOnlyList<Atendimento>> ListarPorClienteAsync(int clienteId);
 }
+
+public interface IDependenteRepository : IRepository<Dependente>
+{
+    Task<IReadOnlyList<Dependente>> ListarPorClienteAsync(int clienteId);
+}
+
+public interface IContratoRepository : IRepository<Contrato>
+{
+    Task<IReadOnlyList<Contrato>> ListarVencidosAtivosAsync(DateOnly dataReferencia);
+    Task<bool> PossuiContratoAtivoAsync(int clienteId, int planoId, DateOnly data);
+}

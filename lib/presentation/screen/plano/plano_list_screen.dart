@@ -95,7 +95,7 @@ class _PlanoListScreenState extends State<PlanoListScreen> {
                   title: Text(plano.nome),
                   subtitle: Text(
                     'Mensalidade: R\$ ${plano.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda)}\n'
-                    'Dependente: R\$ ${plano.valorDependente.toStringAsFixed(AppConstants.casasDecimaisMoeda)} - ${plano.tipoCobertura}',
+                    '${plano.tipoCobertura}',
                   ),
                   onTap: () => _abrirDetalhe(plano),
                   trailing: PopupMenuButton<OpcaoMenuLista>(

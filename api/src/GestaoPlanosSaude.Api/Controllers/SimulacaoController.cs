@@ -11,18 +11,14 @@ namespace GestaoPlanosSaude.Api.Controllers;
 public sealed class SimulacaoController(SimulacaoService service) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<ResultWrapper<SimulacaoResultado>>> Simular(SimulacaoRequest request)
+    public async Task<ActionResult<ResultWrapper<Mensalidade>>> Simular(SimulacaoRequest request)
     {
-        var resultado = await service.SimularAsync(request.PlanoId, request.Idade, request.QuantidadeDependentes);
-        if (resultado is null)
-        {
-            return BadRequest(ResultWrapper<SimulacaoResultado>.Fail(
-                "Não foi possível realizar a simulação.",
-                "Verifique plano, idade e quantidade de dependentes."));
-        }
-
-        return Ok(ResultWrapper<SimulacaoResultado>.Ok(resultado));
+        var resultado = await service.SimularAsync(
+            request.PlanoId,
+            request.IdadeTitular,
+            request.IdadesDependentes);
+        return Ok(ResultWrapper<Mensalidade>.Ok(resultado));
     }
 }
 
-public sealed record SimulacaoRequest(int PlanoId, int Idade, int QuantidadeDependentes);
+public sealed record SimulacaoRequest(int PlanoId, int IdadeTitular, List<int> IdadesDependentes);

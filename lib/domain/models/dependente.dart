@@ -4,6 +4,7 @@ class Dependente {
   String nome;
   String cpf;
   String parentesco;
+  String dataNascimento;
   String clienteNome;
 
   Dependente({
@@ -12,6 +13,7 @@ class Dependente {
     this.nome = '',
     this.cpf = '',
     this.parentesco = '',
+    this.dataNascimento = '',
     this.clienteNome = '',
   });
 
@@ -21,6 +23,7 @@ class Dependente {
     'nome': nome,
     'cpf': cpf,
     'parentesco': parentesco,
+    if (dataNascimento.isNotEmpty) 'data_nascimento': dataNascimento,
   };
 
   static Dependente fromMap(Map<String, dynamic> map) => Dependente(
@@ -29,6 +32,7 @@ class Dependente {
     nome: map['nome'] ?? '',
     cpf: map['cpf'] ?? '',
     parentesco: map['parentesco'] ?? '',
+    dataNascimento: map['data_nascimento'] ?? '',
     clienteNome: map['cliente_nome'] ?? '',
   );
 }

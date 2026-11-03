@@ -13,17 +13,17 @@ public interface ICrudService<T> where T : class, IEntity
 
 public class CrudService<T>(IRepository<T> repository) : ICrudService<T> where T : class, IEntity
 {
-    public Task<IReadOnlyList<T>> ListarAsync(string? busca = null)
+    public virtual Task<IReadOnlyList<T>> ListarAsync(string? busca = null)
     {
         return repository.ListarAsync(busca);
     }
 
-    public Task<T?> ObterAsync(int id)
+    public virtual Task<T?> ObterAsync(int id)
     {
         return repository.ObterAsync(id);
     }
 
-    public async Task<int> SalvarAsync(T entidade)
+    public virtual async Task<int> SalvarAsync(T entidade)
     {
         if (entidade.Id == 0)
         {
@@ -63,59 +63,6 @@ public sealed class FaixaValorService(IFaixaValorRepository repository)
     public Task<FaixaValor?> ObterPorIdadeAsync(int planoId, int idade)
     {
         return repository.ObterPorIdadeAsync(planoId, idade);
-    }
-}
-
-public sealed class AtendimentoService(IAtendimentoRepository repository)
-{
-    public Task<IReadOnlyList<Atendimento>> ListarPorClienteAsync(int clienteId)
-    {
-        return repository.ListarPorClienteAsync(clienteId);
-    }
-}
-
-public sealed record SimulacaoResultado(
-    decimal ValorTotal,
-    decimal ValorFaixa,
-    decimal ValorDependente,
-    int QuantidadeDependentes);
-
-public sealed class SimulacaoService(
-    IRepository<Plano> planoRepository,
-    IFaixaValorRepository faixaValorRepository)
-{
-    public async Task<SimulacaoResultado?> SimularAsync(
-        int planoId,
-        int idade,
-        int quantidadeDependentes)
-    {
-        var idadeInvalida = idade < 0;
-        var quantidadeInvalida = quantidadeDependentes < 0;
-        if (idadeInvalida || quantidadeInvalida)
-        {
-            return null;
-        }
-
-        var plano = await planoRepository.ObterAsync(planoId);
-        if (plano is null)
-        {
-            return null;
-        }
-
-        var faixaValor = await faixaValorRepository.ObterPorIdadeAsync(planoId, idade);
-        if (faixaValor is null)
-        {
-            return null;
-        }
-
-        var valorDependentes = quantidadeDependentes * plano.ValorDependente;
-        var valorTotal = faixaValor.Valor + valorDependentes;
-
-        return new(
-            valorTotal,
-            faixaValor.Valor,
-            plano.ValorDependente,
-            quantidadeDependentes);
     }
 }
 

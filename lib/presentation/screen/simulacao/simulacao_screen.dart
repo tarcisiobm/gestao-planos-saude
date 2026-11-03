@@ -17,13 +17,10 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
   final _planoService = PlanoService();
   final _simulacaoService = SimulacaoService();
   final _idadeController = TextEditingController();
-  final _dependentesController = TextEditingController(text: '0');
+  final List<TextEditingController> _idadesDependentes = [];
   List<Plano> _planos = [];
   int? _planoId;
-  double? _resultado;
-  double _valorPlanoUsado = 0;
-  double _valorDependenteUsado = 0;
-  int? _idadeUsada;
+  ResultadoSimulacao? _resultado;
   bool _carregando = true;
 
   @override
@@ -43,8 +40,20 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
   @override
   void dispose() {
     _idadeController.dispose();
-    _dependentesController.dispose();
+    for (final controller in _idadesDependentes) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  void _adicionarDependente() {
+    setState(() => _idadesDependentes.add(TextEditingController()));
+  }
+
+  void _removerDependente(int indice) {
+    final controller = _idadesDependentes.removeAt(indice);
+    controller.dispose();
+    setState(() {});
   }
 
   Future<void> _simular() async {
@@ -61,14 +70,24 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
       ).showSnackBar(const SnackBar(content: Text('Informe uma idade válida')));
       return;
     }
-    final quantidadeDependentes =
-        int.tryParse(_dependentesController.text) ?? 0;
+    final idadesDependentes = <int>[];
+    for (final controller in _idadesDependentes) {
+      final idadeDependente = int.tryParse(controller.text);
+      if (idadeDependente == null || idadeDependente < 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Informe a idade de cada dependente')),
+        );
+        return;
+      }
+      idadesDependentes.add(idadeDependente);
+    }
+
     late final ResultadoSimulacao resultado;
     try {
       resultado = await _simulacaoService.simular(
         planoId: _planoId!,
-        idade: idade,
-        quantidadeDependentes: quantidadeDependentes,
+        idadeTitular: idade,
+        idadesDependentes: idadesDependentes,
       );
     } on ApiException catch (erro) {
       if (!mounted) {
@@ -85,12 +104,7 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
       return;
     }
 
-    setState(() {
-      _idadeUsada = idade;
-      _valorPlanoUsado = resultado.valorFaixa;
-      _valorDependenteUsado = resultado.valorDependente;
-      _resultado = resultado.valorTotal;
-    });
+    setState(() => _resultado = resultado);
   }
 
   @override
@@ -131,26 +145,41 @@ class _SimulacaoScreenState extends State<SimulacaoScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _dependentesController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Número de dependentes',
-              border: OutlineInputBorder(),
+          for (var indice = 0; indice < _idadesDependentes.length; indice++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: TextField(
+                controller: _idadesDependentes[indice],
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Idade do dependente ${indice + 1}',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    tooltip: 'Remover dependente',
+                    icon: const Icon(Icons.close),
+                    onPressed: () => _removerDependente(indice),
+                  ),
+                ),
+              ),
             ),
+          TextButton.icon(
+            onPressed: _adicionarDependente,
+            icon: const Icon(Icons.person_add),
+            label: const Text('Adicionar dependente'),
           ),
           const SizedBox(height: 16),
           ElevatedButton(onPressed: _simular, child: const Text('Simular')),
           if (_resultado != null) ...[
             const SizedBox(height: 24),
             Text(
-              'Valor estimado: R\$ ${_resultado!.toStringAsFixed(AppConstants.casasDecimaisMoeda)} /mês',
+              'Valor estimado: R\$ ${_resultado!.valorTotal.toStringAsFixed(AppConstants.casasDecimaisMoeda)} /mês',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            Text(
-              '(faixa de $_idadeUsada anos: R\$ ${_valorPlanoUsado.toStringAsFixed(AppConstants.casasDecimaisMoeda)} + R\$ ${_valorDependenteUsado.toStringAsFixed(AppConstants.casasDecimaisMoeda)} por dependente)',
-              style: const TextStyle(color: Colors.grey),
-            ),
+            for (final pessoa in _resultado!.pessoas)
+              Text(
+                '${pessoa.descricao} (${pessoa.idade} anos): R\$ ${pessoa.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda)}',
+                style: const TextStyle(color: Colors.grey),
+              ),
           ],
         ],
       ),

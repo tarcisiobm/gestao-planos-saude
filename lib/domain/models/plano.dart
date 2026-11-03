@@ -3,7 +3,6 @@ class Plano {
   String nome;
   String tipoCobertura;
   double valor;
-  double valorDependente;
   String vigencia;
   String formaPagamento;
 
@@ -12,7 +11,6 @@ class Plano {
     this.nome = '',
     this.tipoCobertura = '',
     this.valor = 0,
-    this.valorDependente = 0,
     this.vigencia = '',
     this.formaPagamento = '',
   });
@@ -22,7 +20,6 @@ class Plano {
     'nome': nome,
     'tipo_cobertura': tipoCobertura,
     'valor': valor,
-    'valor_dependente': valorDependente,
     'vigencia': vigencia,
     'forma_pagamento': formaPagamento,
   };
@@ -32,7 +29,6 @@ class Plano {
     nome: map['nome'] ?? '',
     tipoCobertura: map['tipo_cobertura'] ?? '',
     valor: _toDouble(map['valor']),
-    valorDependente: _toDouble(map['valor_dependente']),
     vigencia: map['vigencia'] ?? '',
     formaPagamento: map['forma_pagamento'] ?? '',
   );

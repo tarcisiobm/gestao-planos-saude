@@ -4,6 +4,7 @@ import '../../../domain/models/cliente.dart';
 import '../../../domain/models/dependente.dart';
 import '../../../domain/services/cliente_service.dart';
 import '../../../domain/services/dependente_service.dart';
+import '../../widgets/campo_data.dart';
 
 class DependenteFormScreen extends StatefulWidget {
   const DependenteFormScreen({super.key});
@@ -21,6 +22,7 @@ class _DependenteFormScreenState extends State<DependenteFormScreen> {
   late final TextEditingController _parentesco;
   List<Cliente> _clientes = [];
   int? _clienteId;
+  String _dataNascimento = '';
   bool _iniciado = false;
   bool _carregando = true;
 
@@ -35,6 +37,7 @@ class _DependenteFormScreenState extends State<DependenteFormScreen> {
     _cpf = TextEditingController(text: _dependente.cpf);
     _parentesco = TextEditingController(text: _dependente.parentesco);
     _clienteId = _dependente.clienteId;
+    _dataNascimento = _dependente.dataNascimento;
     _carregarClientes();
   }
 
@@ -63,7 +66,14 @@ class _DependenteFormScreenState extends State<DependenteFormScreen> {
       ).showSnackBar(const SnackBar(content: Text('Selecione o titular')));
       return;
     }
+    if (_dataNascimento.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informe a data de nascimento')),
+      );
+      return;
+    }
     _dependente.clienteId = _clienteId;
+    _dependente.dataNascimento = _dataNascimento;
     _dependente.nome = _nome.text;
     _dependente.cpf = _cpf.text;
     _dependente.parentesco = _parentesco.text;
@@ -104,6 +114,11 @@ class _DependenteFormScreenState extends State<DependenteFormScreen> {
           _campo(_nome, 'Nome'),
           _campo(_cpf, 'CPF'),
           _campo(_parentesco, 'Parentesco'),
+          CampoData(
+            label: 'Data de nascimento',
+            valor: _dataNascimento,
+            onChanged: (data) => setState(() => _dataNascimento = data),
+          ),
           const SizedBox(height: 16),
           ElevatedButton(onPressed: _salvar, child: const Text('Salvar')),
         ],

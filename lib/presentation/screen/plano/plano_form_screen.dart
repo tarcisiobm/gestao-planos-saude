@@ -17,7 +17,6 @@ class _PlanoFormScreenState extends State<PlanoFormScreen> {
   late final TextEditingController _nome;
   late final TextEditingController _tipoCobertura;
   late final TextEditingController _valor;
-  late final TextEditingController _valorDependente;
   late final TextEditingController _vigencia;
   late final TextEditingController _formaPagamento;
   bool _iniciado = false;
@@ -36,13 +35,6 @@ class _PlanoFormScreenState extends State<PlanoFormScreen> {
           ? ''
           : _plano.valor.toStringAsFixed(AppConstants.casasDecimaisMoeda),
     );
-    _valorDependente = TextEditingController(
-      text: _plano.id == null
-          ? ''
-          : _plano.valorDependente.toStringAsFixed(
-              AppConstants.casasDecimaisMoeda,
-            ),
-    );
     _vigencia = TextEditingController(text: _plano.vigencia);
     _formaPagamento = TextEditingController(text: _plano.formaPagamento);
   }
@@ -53,7 +45,6 @@ class _PlanoFormScreenState extends State<PlanoFormScreen> {
       _nome.dispose();
       _tipoCobertura.dispose();
       _valor.dispose();
-      _valorDependente.dispose();
       _vigencia.dispose();
       _formaPagamento.dispose();
     }
@@ -64,8 +55,6 @@ class _PlanoFormScreenState extends State<PlanoFormScreen> {
     _plano.nome = _nome.text;
     _plano.tipoCobertura = _tipoCobertura.text;
     _plano.valor = double.tryParse(_valor.text.replaceAll(',', '.')) ?? 0;
-    _plano.valorDependente =
-        double.tryParse(_valorDependente.text.replaceAll(',', '.')) ?? 0;
     _plano.vigencia = _vigencia.text;
     _plano.formaPagamento = _formaPagamento.text;
     await _service.salvar(_plano);
@@ -83,7 +72,6 @@ class _PlanoFormScreenState extends State<PlanoFormScreen> {
           _campo(_nome, 'Nome'),
           _campo(_tipoCobertura, 'Tipo de cobertura'),
           _campo(_valor, 'Valor', numero: true),
-          _campo(_valorDependente, 'Valor por dependente', numero: true),
           _campo(_vigencia, 'Vigência'),
           _campo(_formaPagamento, 'Forma de pagamento'),
           const SizedBox(height: 16),

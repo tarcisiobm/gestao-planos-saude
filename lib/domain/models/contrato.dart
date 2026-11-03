@@ -8,6 +8,7 @@ class Contrato {
   String validade;
   String status;
   bool renovacaoAutomatica;
+  double valorMensal;
   String clienteNome;
   String planoNome;
 
@@ -19,6 +20,7 @@ class Contrato {
     this.validade = '',
     this.status = StatusContrato.ativo,
     this.renovacaoAutomatica = false,
+    this.valorMensal = 0,
     this.clienteNome = '',
     this.planoNome = '',
   });
@@ -44,6 +46,7 @@ class Contrato {
       status: map['status'] ?? StatusContrato.ativo,
       renovacaoAutomatica:
           renovacao == true || renovacao == 1 || renovacao == '1',
+      valorMensal: (map['valor_mensal'] as num? ?? 0).toDouble(),
       clienteNome: map['cliente_nome'] ?? '',
       planoNome: map['plano_nome'] ?? '',
     );

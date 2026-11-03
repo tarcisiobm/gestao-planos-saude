@@ -4,6 +4,7 @@ class Cliente {
   String cpf;
   String telefone;
   String email;
+  String dataNascimento;
   String rua;
   String numero;
   String complemento;
@@ -18,6 +19,7 @@ class Cliente {
     this.cpf = '',
     this.telefone = '',
     this.email = '',
+    this.dataNascimento = '',
     this.rua = '',
     this.numero = '',
     this.complemento = '',
@@ -33,6 +35,7 @@ class Cliente {
     'cpf': cpf,
     'telefone': telefone,
     'email': email,
+    if (dataNascimento.isNotEmpty) 'data_nascimento': dataNascimento,
     'rua': rua,
     'numero': numero,
     'complemento': complemento,
@@ -48,6 +51,7 @@ class Cliente {
     cpf: map['cpf'] ?? '',
     telefone: map['telefone'] ?? '',
     email: map['email'] ?? '',
+    dataNascimento: map['data_nascimento'] ?? '',
     rua: map['rua'] ?? '',
     numero: map['numero'] ?? '',
     complemento: map['complemento'] ?? '',

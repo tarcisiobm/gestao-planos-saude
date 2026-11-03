@@ -6,6 +6,7 @@ import '../../../domain/models/servico.dart';
 import '../../../domain/services/atendimento_service.dart';
 import '../../../domain/services/cliente_service.dart';
 import '../../../domain/services/servico_service.dart';
+import '../../widgets/campo_data.dart';
 
 class AtendimentoFormScreen extends StatefulWidget {
   const AtendimentoFormScreen({super.key});
@@ -19,7 +20,7 @@ class _AtendimentoFormScreenState extends State<AtendimentoFormScreen> {
   final _clienteService = ClienteService();
   final _servicoService = ServicoService();
   late final Atendimento _atendimento;
-  late final TextEditingController _data;
+  String _data = '';
   late final TextEditingController _horario;
   late final TextEditingController _descricao;
   List<Cliente> _clientes = [];
@@ -36,7 +37,7 @@ class _AtendimentoFormScreenState extends State<AtendimentoFormScreen> {
     _iniciado = true;
     final argumento = ModalRoute.of(context)?.settings.arguments;
     _atendimento = argumento is Atendimento ? argumento : Atendimento();
-    _data = TextEditingController(text: _atendimento.data);
+    _data = _atendimento.data;
     _horario = TextEditingController(text: _atendimento.horario);
     _descricao = TextEditingController(text: _atendimento.descricao);
     _clienteId = _atendimento.clienteId;
@@ -58,7 +59,6 @@ class _AtendimentoFormScreenState extends State<AtendimentoFormScreen> {
   @override
   void dispose() {
     if (_iniciado) {
-      _data.dispose();
       _horario.dispose();
       _descricao.dispose();
     }
@@ -66,15 +66,17 @@ class _AtendimentoFormScreenState extends State<AtendimentoFormScreen> {
   }
 
   Future<void> _salvar() async {
-    if (_clienteId == null || _servicoId == null) {
+    if (_clienteId == null || _servicoId == null || _data.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione o cliente e o serviço')),
+        const SnackBar(
+          content: Text('Selecione o cliente, o serviço e a data'),
+        ),
       );
       return;
     }
     _atendimento.clienteId = _clienteId;
     _atendimento.servicoId = _servicoId;
-    _atendimento.data = _data.text;
+    _atendimento.data = _data;
     _atendimento.horario = _horario.text;
     _atendimento.descricao = _descricao.text;
     await _service.salvar(_atendimento);
@@ -133,7 +135,11 @@ class _AtendimentoFormScreenState extends State<AtendimentoFormScreen> {
             onChanged: (servicoId) => setState(() => _servicoId = servicoId),
           ),
           const SizedBox(height: 12),
-          _campo(_data, 'Data'),
+          CampoData(
+            label: 'Data',
+            valor: _data,
+            onChanged: (data) => setState(() => _data = data),
+          ),
           _campo(_horario, 'Horário'),
           TextField(
             controller: _descricao,
