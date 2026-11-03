@@ -156,7 +156,7 @@ Códigos utilizados:
 - A simulação recebe a idade do titular e de cada dependente e retorna o total e o valor por pessoa.
 - Na renovação, contratos vencidos com renovação automática ganham nova validade e têm as idades e o valor recalculados; os demais passam para `Vencido`. A API executa a renovação ao iniciar e a cada 24 horas, e também pelo endpoint `POST /api/contratos/renovacoes`.
 - O pagamento pertence a um contrato. Sem valor informado, usa o valor mensal do contrato. Um pagamento não pago com vencimento passado é retornado como `Atrasado`, com os dias de atraso.
-- O atendimento só é aceito se o cliente tiver contrato ativo com o plano do serviço na data do atendimento.
+- O atendimento pode ser do titular ou de um dependente dele e só é aceito se o titular tiver contrato ativo com o plano do serviço na data do atendimento. O histórico filtrado por cliente mostra os atendimentos do titular e dos dependentes.
 - Datas são enviadas e retornadas no formato `yyyy-MM-dd`.
 
 ## Endpoints principais

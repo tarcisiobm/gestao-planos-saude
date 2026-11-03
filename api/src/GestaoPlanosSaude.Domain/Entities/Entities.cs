@@ -103,11 +103,13 @@ public sealed class Atendimento : IEntity
 {
     public int Id { get; set; }
     public int ClienteId { get; set; }
+    public int? DependenteId { get; set; }
     public int ServicoId { get; set; }
     public DateOnly Data { get; set; }
     public string Horario { get; set; } = "";
     public string Descricao { get; set; } = "";
     public string ClienteNome { get; set; } = "";
+    public string DependenteNome { get; set; } = "";
     public string ServicoNome { get; set; } = "";
     public string PlanoNome { get; set; } = "";
     public string PrestadorNome { get; set; } = "";

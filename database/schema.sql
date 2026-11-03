@@ -89,12 +89,14 @@ CREATE TABLE IF NOT EXISTS faixa_valor (
 
 CREATE TABLE IF NOT EXISTS atendimento (
   id          INT AUTO_INCREMENT PRIMARY KEY,
-  cliente_id  INT NOT NULL,
-  servico_id  INT NOT NULL,
-  data        DATE NOT NULL,
-  horario     VARCHAR(10),
-  descricao   VARCHAR(255),
+  cliente_id     INT NOT NULL,
+  dependente_id  INT NULL,
+  servico_id     INT NOT NULL,
+  data           DATE NOT NULL,
+  horario        VARCHAR(10),
+  descricao      VARCHAR(255),
   FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+  FOREIGN KEY (dependente_id) REFERENCES dependente(id),
   FOREIGN KEY (servico_id) REFERENCES servico(id)
 );
 

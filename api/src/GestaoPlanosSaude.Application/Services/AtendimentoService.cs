@@ -7,7 +7,8 @@ namespace GestaoPlanosSaude.Application.Services;
 public sealed class AtendimentoService(
     IAtendimentoRepository atendimentoRepository,
     IServicoRepository servicoRepository,
-    IContratoRepository contratoRepository) : CrudService<Atendimento>(atendimentoRepository)
+    IContratoRepository contratoRepository,
+    IDependenteRepository dependenteRepository) : CrudService<Atendimento>(atendimentoRepository)
 {
     public Task<IReadOnlyList<Atendimento>> ListarPorClienteAsync(int clienteId)
     {
@@ -20,6 +21,15 @@ public sealed class AtendimentoService(
         if (servico is null)
         {
             throw new DadosInvalidosException("Serviço não encontrado.");
+        }
+
+        if (atendimento.DependenteId is not null)
+        {
+            var dependente = await dependenteRepository.ObterAsync(atendimento.DependenteId.Value);
+            if (dependente is null || dependente.ClienteId != atendimento.ClienteId)
+            {
+                throw new DadosInvalidosException("O dependente não pertence ao cliente informado.");
+            }
         }
 
         var possuiContratoAtivo = await contratoRepository.PossuiContratoAtivoAsync(

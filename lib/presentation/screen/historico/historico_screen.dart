@@ -64,7 +64,9 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Excluir?'),
-        content: Text('Excluir o atendimento de ${atendimento.clienteNome}?'),
+        content: Text(
+          'Excluir o atendimento de ${_descreverPaciente(atendimento)}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -81,6 +83,14 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       await _service.excluir(atendimento.id!);
       _carregar();
     }
+  }
+
+  String _descreverPaciente(Atendimento atendimento) {
+    if (atendimento.dependenteNome.isEmpty) {
+      return atendimento.clienteNome;
+    }
+
+    return '${atendimento.dependenteNome} (dependente de ${atendimento.clienteNome})';
   }
 
   @override
@@ -134,7 +144,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                       final atendimento = _atendimentos[indice];
                       return ListTile(
                         isThreeLine: true,
-                        title: Text(atendimento.clienteNome),
+                        title: Text(_descreverPaciente(atendimento)),
                         subtitle: Text(
                           '${formatarData(atendimento.data)} ${atendimento.horario} - ${atendimento.servicoNome}\n'
                           '${atendimento.planoNome} · ${atendimento.prestadorNome}\n'

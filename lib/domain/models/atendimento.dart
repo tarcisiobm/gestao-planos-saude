@@ -1,11 +1,13 @@
 class Atendimento {
   int? id;
   int? clienteId;
+  int? dependenteId;
   int? servicoId;
   String data;
   String horario;
   String descricao;
   String clienteNome;
+  String dependenteNome;
   String servicoNome;
   String planoNome;
   String prestadorNome;
@@ -13,11 +15,13 @@ class Atendimento {
   Atendimento({
     this.id,
     this.clienteId,
+    this.dependenteId,
     this.servicoId,
     this.data = '',
     this.horario = '',
     this.descricao = '',
     this.clienteNome = '',
+    this.dependenteNome = '',
     this.servicoNome = '',
     this.planoNome = '',
     this.prestadorNome = '',
@@ -26,6 +30,7 @@ class Atendimento {
   Map<String, dynamic> toMap() => {
     'id': id,
     'cliente_id': clienteId,
+    'dependente_id': dependenteId,
     'servico_id': servicoId,
     'data': data,
     'horario': horario,
@@ -35,11 +40,13 @@ class Atendimento {
   static Atendimento fromMap(Map<String, dynamic> map) => Atendimento(
     id: map['id'] as int?,
     clienteId: map['cliente_id'] as int?,
+    dependenteId: map['dependente_id'] as int?,
     servicoId: map['servico_id'] as int?,
     data: map['data'] ?? '',
     horario: map['horario'] ?? '',
     descricao: map['descricao'] ?? '',
     clienteNome: map['cliente_nome'] ?? '',
+    dependenteNome: map['dependente_nome'] ?? '',
     servicoNome: map['servico_nome'] ?? '',
     planoNome: map['plano_nome'] ?? '',
     prestadorNome: map['prestador_nome'] ?? '',

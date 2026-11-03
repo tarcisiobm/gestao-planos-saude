@@ -399,23 +399,27 @@ public sealed class AtendimentoRepository(IDbConnectionFactory factory)
     protected override string SelectSql => """
         SELECT atendimento.*,
                cliente.nome cliente_nome,
+               dependente.nome dependente_nome,
                servico.nome servico_nome,
                plano.nome plano_nome,
                prestador.nome prestador_nome
         FROM atendimento
         LEFT JOIN cliente ON cliente.id = atendimento.cliente_id
+        LEFT JOIN dependente ON dependente.id = atendimento.dependente_id
         LEFT JOIN servico ON servico.id = atendimento.servico_id
         LEFT JOIN plano ON plano.id = servico.plano_id
         LEFT JOIN prestador ON prestador.id = servico.prestador_id
         """;
-    protected override string SearchWhere => "cliente.nome LIKE @Busca OR servico.nome LIKE @Busca";
+    protected override string SearchWhere =>
+        "cliente.nome LIKE @Busca OR dependente.nome LIKE @Busca OR servico.nome LIKE @Busca";
     protected override string InsertSql => """
-        INSERT INTO atendimento (cliente_id, servico_id, data, horario, descricao)
-        VALUES (@ClienteId, @ServicoId, @Data, @Horario, @Descricao)
+        INSERT INTO atendimento (cliente_id, dependente_id, servico_id, data, horario, descricao)
+        VALUES (@ClienteId, @DependenteId, @ServicoId, @Data, @Horario, @Descricao)
         """;
     protected override string UpdateSql => """
         UPDATE atendimento
         SET cliente_id = @ClienteId,
+            dependente_id = @DependenteId,
             servico_id = @ServicoId,
             data = @Data,
             horario = @Horario,
